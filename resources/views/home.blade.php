@@ -1,15 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .home-page {
-        min-height: calc(100vh - 72px);
-        background:
-            linear-gradient(145deg, rgba(248, 250, 252, 0.94), rgba(241, 245, 249, 0.92)),
-            url("{{ asset('imgs/welcome-bg.svg') }}") center/cover no-repeat fixed;
-        padding: 1rem 0 2rem;
-    }
-</style>
+
 <div class="container">
     <div class="row justify-content-start">
         @include('layouts.left-menu')
@@ -156,6 +148,5 @@
             @include('layouts.footer')
         </div>
     </div>
-</div>
 </div>
 @endsection

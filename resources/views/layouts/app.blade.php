@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Unifiedtransform') }}</title>
+    <title>{{ config('app.name', 'Mapandan Learning Management System') }}</title>
 
     <link rel="shortcut icon" href="{{asset('favicon_io/favicon.ico')}}">
     <link rel="shortcut icon" sizes="16x16" href="{{asset('favicon_io/favicon-16x16.png')}}">
@@ -27,6 +27,17 @@
    
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <style>
+        .sidebar-page-background {
+            min-height: calc(100vh - 72px);
+            background:
+                linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(222, 229, 247, 0.94), rgba(237, 242, 255, 0.92)),
+                url("{{ asset('imgs/welcome-bg.svg') }}") center/cover no-repeat fixed;
+            padding: 1rem 0 2rem;
+        }
+    </style>
+
 </head>
 <body>
     <div id="app">
@@ -34,7 +45,7 @@
         <nav class="navbar sticky-top navbar-expand-md navbar-light bg-white border-btm-e6">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <i class="bi bi-house"></i> {{ config('app.name', 'Laravel') }}
+                    <i class="bi bi-house"></i> {{ config('app.name', 'Mapandan Learning Management System') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -99,13 +110,21 @@
             </div>
         </nav>
           @endunless
+
+           @auth
+        <main class="sidebar-page-background">
+            @yield('content')
+        </main>
+        @else
         <main>
             @yield('content')
         </main>
+
+         @endauth
     </div>
 
     <div id="watermark">
-        <p>Unifiedtransform</p>
+        <p>Mapandan Learning Management System</p>
     </div>
 </body>
 </html>
