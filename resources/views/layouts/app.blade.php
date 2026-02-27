@@ -9,12 +9,7 @@
 
     <title>{{ config('app.name', 'Mapandan Learning Management System') }}</title>
 
-    <link rel="shortcut icon" href="{{asset('favicon_io/favicon.ico')}}">
-    <link rel="shortcut icon" sizes="16x16" href="{{asset('favicon_io/favicon-16x16.png')}}">
-    <link rel="shortcut icon" sizes="32x32" href="{{asset('favicon_io/favicon-32x32.png')}}">
-    <link rel="apple-touch-icon" href="{{asset('favicon_io/apple-touch-icon.png')}}">
-    <link rel="icon" href="{{asset('favicon_io/android-chrome-192x192.png')}}" sizes="192x192">
-    <link rel="icon" href="{{asset('favicon_io/android-chrome-512x512.png')}}" sizes="512x512">
+     <link rel="icon" type="image/jpeg" href="{{ asset('imgs/school-logo.jpg') }}">
 
     <!-- Scripts -->
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
@@ -36,6 +31,30 @@
                 url("{{ asset('imgs/welcome-bg.svg') }}") center/cover no-repeat fixed;
             padding: 1rem 0 2rem;
         }
+
+         .profile-pill-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.9rem !important;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #417fb9, #709bd3, #125491);
+            color: #fff !important;
+            font-weight: 700;
+        }
+
+        .profile-pill-toggle:hover,
+        .profile-pill-toggle:focus {
+            color: #fff !important;
+            background: linear-gradient(135deg, #148241, #3bb35a, #7bd6c7);
+        }
+
+        .profile-pill-toggle .badge {
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            color: #499ed6 !important;
+        }
+
+        
     </style>
 
 </head>
@@ -45,7 +64,7 @@
         <nav class="navbar sticky-top navbar-expand-md navbar-light bg-white border-btm-e6">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <i class="bi bi-house"></i> {{ config('app.name', 'Mapandan Learning Management System') }}
+                  <img src="{{ asset('imgs/school-logo.jpg') }}" alt="School Logo" height="32" class="me-2">{{ config('app.name', 'Mapandan Learning Management System') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -84,7 +103,7 @@
                             @endif
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                               <a id="navbarDropdown" class="nav-link dropdown-toggle profile-pill-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <span class="badge bg-light text-dark">{{ ucfirst(Auth::user()->role) }}</span>
                                     {{ Auth::user()->first_name }} {{ Auth::user()->last_name }}
                                 </a>

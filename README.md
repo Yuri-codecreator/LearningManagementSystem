@@ -1,27 +1,5 @@
-<h1 align="center"><img src="public/appname.svg" width="500"></h1>
-
-## Version 2.X is here!!
-<p>
-For Version 1.X, view [releases](https://github.com/changeweb/Unifiedtransform/releases). Continuation of Version 1.X support in **[v1-x-branch](https://github.com/changeweb/Unifiedtransform/tree/v1-x-branch)** branch.
-</p>
-<p align="center">
-School Management and Accounting Software
-</p>
-
-[![Build Status](https://travis-ci.org/changeweb/Unifiedtransform.svg?branch=master)](https://travis-ci.org/changeweb/Unifiedtransform)
-![Pricing](https://img.shields.io/badge/Pricing-Free-brightgreen)
-[![Linux](https://img.shields.io/travis/changeweb/Unifiedtransform/master.svg?label=linux)](https://travis-ci.org/changeweb/Unifiedtransform)
-[![Code Climate](https://codeclimate.com/github/changeweb/Unifiedtransform/badges/gpa.svg)](https://codeclimate.com/github/changeweb/Unifiedtransform)
-[![Latest release](https://img.shields.io/github/release/changeweb/Unifiedtransform/all.svg)](https://github.com/changeweb/Unifiedtransform/releases)
-[![MadeWithLaravel.com shield](https://madewithlaravel.com/storage/repo-shields/1362-shield.svg)](https://madewithlaravel.com/p/unifiedtransform/shield-link)
-[![Discord](https://img.shields.io/discord/917848091107946556)](https://discord.gg/8sz6kpup99)
-[![Contribute](https://img.shields.io/badge/Help%20Wanted-Contribute-blue)](https://github.com/changeweb/Unifiedtransform/issues?q=is%3Aissue+is%3Aopen+)
 
 We like to challenge the quality of what we build to make it better. To do so, we try to make the product intuitive, beautiful, and user friendly. Innovation and hard work help to fulfill these requirements. I believe in order to innovate we need to think differently. A few months ago I discovered there was no open source free school management software that met my quality standards. I happen to know a bit of programming so I decided to make one. I also believe that working with more people can push the standard higher than working alone. So I decided to make it open source and free.
-
-## Featured on Laravel News !!
-![Screenshot_2019-04-07 Laravel News](https://user-images.githubusercontent.com/9896315/55683832-1b3c8c80-5966-11e9-8dfb-ab30a79a98ed.png)
-See the news [here](https://laravel-news.com/unified-transform-open-source-school-management-platform)
 
 ## Framework used
 
