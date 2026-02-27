@@ -79,17 +79,34 @@ With the improved Docker setup, you will get:
 - MySQL 5.7
 
 ### Steps to install:
+
+### INSTALL NEEDED PACKAGES
+1. Install first the docker go to this link "https://www.docker.com/products/docker-desktop/" you can download docker windows or using linus depende sa gamit niyong device.
+2. After ma download open niyo yung docker installer and connect niyo ung gmail and github niyo.
+3. Mag da direct kayo sa docker app after niyo ma connect yung gmail or github niyo.
+4. After that open niyo ung POWER SHELL OR CMD niyo then run niyo itong command : 
+  
+    "docker --version" then ito sunod "docker compose version"
+
+    To verify if the docker is running run niyo itong command : 
+   
+    "docker info" 
+
+### INSTALL AND RUN PROGRAM
+
 1. Clone or download the repository.
-2. Create **purify** folder in `storage/app/` directory.
+2. Create **purify** folder in `storage/app/` directory. (IF WALA PA)
 3. Run `cp .env.example .env`.
 4. Run `docker-compose up -d`.
 5. Run `docker exec -it db sh`. Inside the shell, run:
 
-    ```sh
-    :/# mysql -u root -p
-    ```
+Once inside the shell run this :
 
-    Mysql **Root password**: `your_mysql_root_password` in the `docker-compose.yml` file. Then run following commands:
+            "mysql -u root -p"
+            
+then type : root
+
+Then run following commands:
 
     ```sql
     mysql> SHOW DATABASES;
@@ -98,6 +115,10 @@ With the improved Docker setup, you will get:
     mysql> EXIT;
     ```
 6. Finally, exit the container by running `exit` in the container shell.
+
+Type this command to check if the docker is running : docker ps
+You see all the files saying "UP"
+
 7. Run `docker exec -it app sh`. Inside the shell, run following commands:
 
     ```sh
