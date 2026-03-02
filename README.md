@@ -103,7 +103,7 @@ With the improved Docker setup, you will get:
 Once inside the shell run this :
 
             "mysql -u root -p"
-            
+
 then type : root
 
 Then run following commands:
@@ -131,7 +131,7 @@ You see all the files saying "UP"
     Then exit from the container.
 8. Visit **http://localhost:8080**. Admin login credentials:
 
-    - Email: admin@ut.com
+    - Email: manilyndelacuadra@mcs.lms.com
     - Password: password
 
 ## Steps to follow:
