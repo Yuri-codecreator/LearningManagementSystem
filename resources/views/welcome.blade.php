@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Learning Management System</title>
 
-    <link rel="shortcut icon" href="{{ asset('favicon_io/favicon.ico') }}">
-    <link rel="shortcut icon" sizes="16x16" href="{{ asset('favicon_io/favicon-16x16.png') }}">
-    <link rel="shortcut icon" sizes="32x32" href="{{ asset('favicon_io/favicon-32x32.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('favicon_io/apple-touch-icon.png') }}">
-    <link rel="icon" href="{{ asset('favicon_io/android-chrome-192x192.png') }}" sizes="192x192">
-    <link rel="icon" href="{{ asset('favicon_io/android-chrome-512x512.png') }}" sizes="512x512">
+
+     <link rel="icon" type="image/jpeg" href="{{ asset('imgs/school-logo.jpg') }}">
+
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
