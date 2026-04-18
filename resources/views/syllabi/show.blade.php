@@ -33,6 +33,13 @@
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <a href="{{asset('storage/'.$syllabus->syllabus_file_path)}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                    @can('delete syllabi')
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Are you sure you want to delete this syllabus?')) document.getElementById('syllabus-delete-form-{{$syllabus->id}}').submit();"><i class="bi bi-trash2"></i> Delete</button>
+                                                    <form id="syllabus-delete-form-{{$syllabus->id}}" action="{{ route('syllabus.delete') }}" method="POST" class="d-none">
+                                                        @csrf
+                                                        <input type="hidden" name="id" value="{{$syllabus->id}}">
+                                                    </form>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>

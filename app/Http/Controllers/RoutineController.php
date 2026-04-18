@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RoutineStoreRequest;
-use App\Models\Routine;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
 use App\Repositories\RoutineRepository;
@@ -120,8 +119,21 @@ class RoutineController extends Controller
      * @param  \App\Models\Routine  $routine
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Routine $routine)
+    public function destroy(Request $request)
     {
-        //
+        abort_unless(auth()->user()->can('delete routines'), 403);
+
+        $request->validate([
+            'routine_id' => 'required|integer'
+        ]);
+
+        try {
+            $routineRepository = new RoutineRepository();
+            $routineRepository->delete($request->routine_id);
+
+            return back()->with('status', 'Routine deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }

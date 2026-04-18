@@ -7,9 +7,13 @@ interface UserInterface {
 
     public function updateTeacher($request);
 
+    public function deleteTeacher($teacher_id);
+
     public function createStudent($request);
 
     public function updateStudent($request);
+
+    public function deleteStudent($student_id);
 
     public function getAllStudents($current_session, $class_id, $section_id);
 

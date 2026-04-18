@@ -125,8 +125,21 @@ class SyllabusController extends Controller
      * @param  \App\Models\Syllabus  $syllabus
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Syllabus $syllabus)
+    public function destroy(Request $request)
     {
-        //
+        abort_unless(auth()->user()->can('delete syllabi'), 403);
+
+        $request->validate([
+            'id' => 'required|integer'
+        ]);
+
+        try {
+            $syllabusRepository = new SyllabusRepository();
+            $syllabusRepository->delete($request->id);
+
+            return back()->with('status', 'Syllabus deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }
