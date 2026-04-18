@@ -8,6 +8,7 @@
         <div class="col-xs-11 col-sm-11 col-md-11 col-lg-10 col-xl-10 col-xxl-10">
             <div class="row pt-3">
                 <div class="col ps-4">
+                    @include('session-messages')
                     <!-- <h1 class="display-6 mb-3"><i class="ms-auto bi bi-grid"></i> {{ __('Dashboard') }}</h1> -->
                     <div class="row dashboard">
                         <div class="col">
@@ -129,7 +130,18 @@
                                                     </button>
                                                 </h2>
                                                 <div id="flush-collapse{{$notice->id}}" class="accordion-collapse collapse {{($loop->first)?"show":"hide"}}" aria-labelledby="flush-heading{{$notice->id}}" data-bs-parent="#noticeAccordion">
-                                                    <div class="accordion-body overflow-auto">{!!Purify::clean($notice->notice)!!}</div>
+                                                    <div class="accordion-body overflow-auto">
+                                                        @can('delete notices')
+                                                        <div class="mb-3">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Are you sure you want to delete this notice?')) document.getElementById('notice-delete-form-{{$notice->id}}').submit();"><i class="bi bi-trash2"></i> Delete Notice</button>
+                                                            <form id="notice-delete-form-{{$notice->id}}" action="{{ route('notice.delete') }}" method="POST" class="d-none">
+                                                                @csrf
+                                                                <input type="hidden" name="notice_id" value="{{$notice->id}}">
+                                                            </form>
+                                                        </div>
+                                                        @endcan
+                                                        {!!Purify::clean($notice->notice)!!}
+                                                    </div>
                                                 </div>
                                             </div>
                                             @endforeach

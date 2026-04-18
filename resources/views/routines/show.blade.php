@@ -15,6 +15,7 @@
                             <li class="breadcrumb-item active" aria-current="page">Section Routine</li>
                         </ol>
                     </nav>
+                    @include('session-messages')
                     @php
                         function getDayName($weekday) {
                             if($weekday == 1) {
@@ -50,6 +51,13 @@
                                             <td>
                                                 <span>{{$course->course->course_name}}</span>
                                                 <div>{{$course->start}} - {{$course->end}}</div>
+                                                @can('delete routines')
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="if(confirm('Are you sure you want to delete this routine entry?')) document.getElementById('routine-delete-form-{{$course->id}}').submit();"><i class="bi bi-trash2"></i> Delete</button>
+                                                <form id="routine-delete-form-{{$course->id}}" action="{{ route('routine.delete') }}" method="POST" class="d-none">
+                                                    @csrf
+                                                    <input type="hidden" name="routine_id" value="{{$course->id}}">
+                                                </form>
+                                                @endcan
                                             </td>
                                         @endforeach
                                     </tr>

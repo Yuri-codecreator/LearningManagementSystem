@@ -30,4 +30,12 @@ class RoutineRepository implements RoutineInterface {
                 ->where('section_id', $section_id)
                 ->get();
     }
+
+    public function delete($id) {
+        try {
+            Routine::where('id', $id)->delete();
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete routine. '.$e->getMessage());
+        }
+    }
 }
