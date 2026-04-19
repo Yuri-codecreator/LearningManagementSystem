@@ -33,6 +33,11 @@
                     @endif
                     <h3><i class="bi bi-diagram-2"></i> Class #{{request()->query('class_name')}}, Section #{{request()->query('section_name')}}</h3>
                     <h3><i class="bi bi-compass"></i> Course: {{request()->query('course_name')}}</h3>
+                    <div class="alert alert-light border mt-3 mb-2" role="alert">
+                        <h6 class="mb-1"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Grade Input Sheet</h6>
+                        <small class="text-muted d-block">Use the table below like an Excel sheet (rows = students, columns = grading components/exams).</small>
+                        <small class="text-muted d-block">Recommended breakdown: <strong>60%</strong> performance task (attendance, quizzes, class activities) + <strong>40%</strong> examination (midterm/final).</small>
+                    </div>
                     @if (!$final_marks_submitted && count($exams) > 0 && $academic_setting['marks_submission_status'] == "on")
                         <div class="col-3 mt-3">
                             <a type="button" href="{{route('course.final.mark.submit.show', ['class_id' => $class_id, 'class_name' => request()->query('class_name'), 'section_id' => $section_id, 'section_name' => request()->query('section_name'), 'course_id' => $course_id, 'course_name' => request()->query('course_name'), 'semester_id' => $semester_id])}}" class="btn btn-outline-primary" onclick="return confirm('Are you sure, you want to submit final marks?')"><i class="bi bi-check2"></i> Submit Final Marks</a>
@@ -45,7 +50,7 @@
                             <div class="col">
                                 <div class="table-responsive">
                                     
-                                    <table class="table table-hover">
+                                    <table class="table table-hover table-bordered align-middle">
                                         <thead>
                                             <tr>
                                             <th scope="col">Student Name</th>
@@ -66,8 +71,12 @@
                                                     <tr>
                                                         <td>{{$students_with_mark[0]->student->first_name}} {{$students_with_mark[0]->student->last_name}}</td>
                                                         @foreach ($students_with_mark as $st)
+                                                            @php
+                                                                $examName = strtolower($exams[$markedExamCount]->exam_name);
+                                                                $isExamComponent = \Illuminate\Support\Str::contains($examName, ['exam', 'midterm', 'final']);
+                                                            @endphp
                                                             <td>
-                                                                <input type="number" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]" value="{{$st->marks}}">
+                                                                <input type="number" min="0" max="100" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]" value="{{$st->marks}}" placeholder="{{$isExamComponent ? '0-40' : '0-60'}}">
                                                             </td>
                                                             
                                                             @php
@@ -84,7 +93,11 @@
                                                         @endphp
                                                         @for ($i = 0; $i < $gt; $i++)
                                                             <td>
-                                                                <input type="number" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]">
+                                                                @php
+                                                                    $examName = strtolower($exams[$markedExamCount]->exam_name);
+                                                                    $isExamComponent = \Illuminate\Support\Str::contains($examName, ['exam', 'midterm', 'final']);
+                                                                @endphp
+                                                                <input type="number" min="0" max="100" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]" placeholder="{{$isExamComponent ? '0-40' : '0-60'}}">
                                                             </td>
                                                             @php
                                                                 $markedExamCount++;
@@ -101,7 +114,11 @@
                                                         @isset($exams)
                                                             @foreach ($exams as $exam)
                                                                 <td>
-                                                                    <input type="number" class="form-control" name="student_mark[{{$sectionStudent->student->id}}][{{$exam->id}}]">
+                                                                    @php
+                                                                        $examName = strtolower($exam->exam_name);
+                                                                        $isExamComponent = \Illuminate\Support\Str::contains($examName, ['exam', 'midterm', 'final']);
+                                                                    @endphp
+                                                                    <input type="number" min="0" max="100" step="0.01" class="form-control" name="student_mark[{{$sectionStudent->student->id}}][{{$exam->id}}]" placeholder="{{$isExamComponent ? '0-40' : '0-60'}}">
                                                                 </td>
                                                             @endforeach
                                                         @endisset
