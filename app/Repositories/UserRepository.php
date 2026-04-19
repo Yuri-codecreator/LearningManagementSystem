@@ -53,6 +53,7 @@ class UserRepository implements UserInterface {
                     'view attendances',
                     'create assignments',
                     'view assignments',
+                    'create syllabi',
                     'save marks',
                     'view users',
                     'view routines',

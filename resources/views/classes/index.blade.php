@@ -28,7 +28,7 @@
                                                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#class{{$school_class->id}}" role="tab" aria-current="true"><i class="bi bi-diagram-3"></i> {{$school_class->class_name}}</button>
                                                 </li>
                                                 <li class="nav-item">
-                                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#class{{$school_class->id}}-syllabus" role="tab" aria-current="false"><i class="bi bi-journal-text"></i> Syllabus</button>
+                                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#class{{$school_class->id}}-syllabus" role="tab" aria-current="false"><i class="bi bi-journal-text"></i> Curriculum Guide</button>
                                                 </li>
                                                 <li class="nav-item">
                                                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#class{{$school_class->id}}-courses" role="tab" aria-current="false"><i class="bi bi-journal-medical"></i> Courses</button>
@@ -80,7 +80,7 @@
                                                     <table class="table table-borderless">
                                                         <thead>
                                                         <tr>
-                                                            <th scope="col">Syllabus Name</th>
+                                                            <th scope="col">Curriculum Name</th>
                                                             <th scope="col">Actions</th>
                                                         </tr>
                                                         </thead>
@@ -92,7 +92,7 @@
                                                                 <div class="btn-group" role="group">
                                                                     <a href="{{asset('storage/'.$syllabus->syllabus_file_path)}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
                                                                     @can('delete syllabi')
-                                                                    <a href="{{route('syllabus.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this syllabus?')) document.getElementById('syllabus-delete-form-{{$syllabus->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                                    <a href="{{route('syllabus.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this curriculum guide?')) document.getElementById('syllabus-delete-form-{{$syllabus->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
                                                                     <form id="syllabus-delete-form-{{$syllabus->id}}" action="{{route('syllabus.delete')}}" method="POST" class="d-none">
                                                                         @csrf
                                                                         <input type="hidden" name="syllabus_id" value="{{$syllabus->id}}">
