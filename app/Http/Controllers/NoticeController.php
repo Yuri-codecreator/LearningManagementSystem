@@ -98,8 +98,15 @@ class NoticeController extends Controller
      * @param  \App\Models\Notice  $notice
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Notice $notice)
+    public function destroy(Request $request)
     {
-        //
+        try {
+            $noticeRepository = new NoticeRepository();
+            $noticeRepository->delete($request->notice_id);
+
+            return back()->with('status', 'Notice deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }

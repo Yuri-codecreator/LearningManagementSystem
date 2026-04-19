@@ -126,8 +126,15 @@ class GradingSystemController extends Controller
      * @param  \App\Models\GradingSystem  $gradingSystem
      * @return \Illuminate\Http\Response
      */
-    public function destroy(GradingSystem $gradingSystem)
+    public function destroy(Request $request)
     {
-        //
+        try {
+            $gradingSystemRepository = new GradingSystemRepository();
+            $gradingSystemRepository->delete($request->grading_system_id);
+
+            return back()->with('status', 'Grading system deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }

@@ -183,4 +183,24 @@ class UserController extends Controller
 
         return view('teachers.list', $data);
     }
+
+    public function destroyTeacher(Request $request) {
+        try {
+            $this->userRepository->deleteTeacher($request->teacher_id);
+
+            return back()->with('status', 'Teacher deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+    }
+
+    public function destroyStudent(Request $request) {
+        try {
+            $this->userRepository->deleteStudent($request->student_id);
+
+            return back()->with('status', 'Student deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+    }
 }

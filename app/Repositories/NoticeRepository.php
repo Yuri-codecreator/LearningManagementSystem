@@ -21,4 +21,12 @@ class NoticeRepository {
                     ->orderBy('id', 'desc')
                     ->simplePaginate(3);
     }
+
+    public function delete($id) {
+        try {
+            Notice::destroy($id);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete Notice. '.$e->getMessage());
+        }
+    }
 }

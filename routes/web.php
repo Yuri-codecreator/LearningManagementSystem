@@ -122,7 +122,7 @@ Route::middleware(['auth'])->group(function () {
     //     return view('exams.history');
     // });
     Route::post('/exams/create', [ExamController::class, 'store'])->name('exam.create');
-    // Route::post('/exams/delete', [ExamController::class, 'delete'])->name('exam.delete');
+    Route::post('/exams/delete', [ExamController::class, 'destroy'])->name('exam.delete');
     Route::get('/exams/create', [ExamController::class, 'create'])->name('exam.create.show');
     Route::get('/exams/add-rule', [ExamRuleController::class, 'create'])->name('exam.rule.create');
     Route::post('/exams/add-rule', [ExamRuleController::class, 'store'])->name('exam.rule.store');
@@ -132,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/exams/grade/create', [GradingSystemController::class, 'create'])->name('exam.grade.system.create');
     Route::post('/exams/grade/create', [GradingSystemController::class, 'store'])->name('exam.grade.system.store');
     Route::get('/exams/grade/view', [GradingSystemController::class, 'index'])->name('exam.grade.system.index');
+    Route::post('/exams/grade/delete', [GradingSystemController::class, 'destroy'])->name('exam.grade.system.delete');
     Route::get('/exams/grade/add-rule', [GradeRuleController::class, 'create'])->name('exam.grade.system.rule.create');
     Route::post('/exams/grade/add-rule', [GradeRuleController::class, 'store'])->name('exam.grade.system.rule.store');
     Route::get('/exams/grade/view-rules', [GradeRuleController::class, 'index'])->name('exam.grade.system.rule.show');
@@ -158,15 +159,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/syllabus/create', [SyllabusController::class, 'create'])->name('class.syllabus.create');
     Route::post('/syllabus/create', [SyllabusController::class, 'store'])->name('syllabus.store');
     Route::get('/syllabus/index', [SyllabusController::class, 'index'])->name('course.syllabus.index');
+    Route::post('/syllabus/delete', [SyllabusController::class, 'destroy'])->name('syllabus.delete');
 
     // Notices
     Route::get('/notice/create', [NoticeController::class, 'create'])->name('notice.create');
     Route::post('/notice/create', [NoticeController::class, 'store'])->name('notice.store');
+    Route::post('/notice/delete', [NoticeController::class, 'destroy'])->name('notice.delete');
 
     // Courses
     Route::get('courses/teacher/index', [AssignedTeacherController::class, 'getTeacherCourses'])->name('course.teacher.list.show');
     Route::get('courses/student/index/{student_id}', [CourseController::class, 'getStudentCourses'])->name('course.student.list.show');
     Route::get('course/edit/{id}', [CourseController::class, 'edit'])->name('course.edit');
+    Route::post('course/delete', [CourseController::class, 'destroy'])->name('course.delete');
 
     // Assignment
     Route::get('courses/assignments/index', [AssignmentController::class, 'getCourseAssignments'])->name('assignment.list.show');
@@ -176,4 +180,7 @@ Route::middleware(['auth'])->group(function () {
     // Update password
     Route::get('password/edit', [UpdatePasswordController::class, 'edit'])->name('password.edit');
     Route::post('password/edit', [UpdatePasswordController::class, 'update'])->name('password.update');
+
+    Route::post('/teachers/delete', [UserController::class, 'destroyTeacher'])->name('teacher.delete');
+    Route::post('/students/delete', [UserController::class, 'destroyStudent'])->name('student.delete');
 });

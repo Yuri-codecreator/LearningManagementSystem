@@ -24,4 +24,8 @@ interface UserInterface {
     public function getAllTeachers();
 
     public function changePassword($new_password);
+
+    public function deleteTeacher($teacher_id);
+
+    public function deleteStudent($student_id);
 }

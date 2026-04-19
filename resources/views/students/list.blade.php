@@ -80,7 +80,13 @@
                                                 @can('edit users')
                                                 <a href="{{route('student.edit.show', ['id' => $student->student->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-pen"></i> Edit</a>
                                                 @endcan
-                                                {{-- <button type="button" class="btn btn-sm btn-primary"><i class="bi bi-trash2"></i> Delete</button> --}}
+                                                @can('delete users')
+                                                <a href="{{route('student.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this student?')) document.getElementById('student-delete-form-{{$student->student->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                <form id="student-delete-form-{{$student->student->id}}" action="{{ route('student.delete') }}" method="POST" class="d-none">
+                                                    @csrf
+                                                    <input type="hidden" name="student_id" value="{{$student->student->id}}">
+                                                </form>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

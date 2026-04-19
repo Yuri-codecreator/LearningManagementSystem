@@ -29,4 +29,16 @@ class SyllabusRepository {
     public function getByCourse($course_id) {
         return Syllabus::where('course_id', $course_id)->get();
     }
+
+    public function delete($id) {
+        try {
+            $syllabus = Syllabus::find($id);
+            if($syllabus !== null) {
+                Storage::disk('public')->delete($syllabus->syllabus_file_path);
+                $syllabus->delete();
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete syllabus. '.$e->getMessage());
+        }
+    }
 }

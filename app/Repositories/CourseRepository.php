@@ -37,4 +37,12 @@ class CourseRepository implements CourseInterface {
             throw new \Exception('Failed to update Course. '.$e->getMessage());
         }
     }
+
+    public function delete($id) {
+        try {
+            Course::destroy($id);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete Course. '.$e->getMessage());
+        }
+    }
 }
