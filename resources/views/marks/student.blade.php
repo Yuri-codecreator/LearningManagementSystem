@@ -8,13 +8,13 @@
             <div class="row pt-2">
                 <div class="col ps-4">
                     <h1 class="display-6 mb-3">
-                        <i class="bi bi-cloud-sun"></i> Course Marks
+                        <i class="bi bi-cloud-sun"></i> Course Grades
                     </h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
                             <li class="breadcrumb-item"><a href="{{url()->previous()}}">My Courses</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Course Marks</li>
+                            <li class="breadcrumb-item active" aria-current="page">Course Grades</li>
                         </ol>
                     </nav>
                     <h5>Course: {{$course_name}}</h5>
@@ -23,7 +23,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Exam Name</th>
-                                    <th scope="col">Marks</th>
+                                    <th scope="col">Grade Score</th>
                                 </tr>
                             </thead>
                             <tbody>
