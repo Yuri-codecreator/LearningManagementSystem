@@ -18,17 +18,49 @@
                         </ol>
                     </nav>
                     @include('session-messages')
+
+                    @php
+                        $writtenExams = [];
+                        $performanceExams = [];
+                        $quarterlyExams = [];
+
+                        foreach ($exams as $exam) {
+                            $examName = strtolower($exam->exam_name);
+
+                            if (strpos($examName, 'quarterly') !== false || strpos($examName, 'assessment') !== false || preg_match('/\bqa\b/i', $exam->exam_name) || strpos($examName, 'exam') !== false) {
+                                $quarterlyExams[] = $exam;
+                            } elseif (strpos($examName, 'performance') !== false || strpos($examName, 'project') !== false || strpos($examName, 'task') !== false || preg_match('/\bpt\b/i', $exam->exam_name) || strpos($examName, 'practical') !== false) {
+                                $performanceExams[] = $exam;
+                            } else {
+                                $writtenExams[] = $exam;
+                            }
+                        }
+
+                        if (count($quarterlyExams) === 0 && count($exams) > 0) {
+                            $quarterlyExams[] = $exams[count($exams) - 1];
+                        }
+
+                        $wwExamId = count($writtenExams) > 0 ? $writtenExams[0]->id : null;
+                        $ptExamId = count($performanceExams) > 0 ? $performanceExams[0]->id : null;
+                        $qaExamId = count($quarterlyExams) > 0 ? $quarterlyExams[0]->id : null;
+
+                        $marksByStudentByExam = [];
+                        foreach ($students_with_marks as $studentId => $studentMarks) {
+                            foreach ($studentMarks as $studentMark) {
+                                $marksByStudentByExam[$studentId][$studentMark->exam_id] = (float) $studentMark->marks;
+                            }
+                        }
+                    @endphp
+
                     @if ($academic_setting['marks_submission_status'] == "on")
                     <p class="text-primary">
                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Marks Submission Window is open now.
                     </p>
                     @endif
                     <p class="text-primary">
-                        <i class="bi bi-exclamation-diamond-fill me-2"></i> Final Marks submission should be done only once in a Semester when the Marks Submission Window is open.
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
                     </p>
-                    <p class="text-primary">
-                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Use the worksheet below to input per-student grades in an Excel-style grid. Add performance (60%) and exam (40%) scores for each student.
-                    </p>
+
                     @if ($final_marks_submitted)
                     <p class="text-success">
                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Marks are submitted.
@@ -36,102 +68,96 @@
                     @endif
                     <h3><i class="bi bi-diagram-2"></i> Class #{{request()->query('class_name')}}, Section #{{request()->query('section_name')}}</h3>
                     <h3><i class="bi bi-compass"></i> Course: {{request()->query('course_name')}}</h3>
+
                     @if (!$final_marks_submitted && count($exams) > 0 && $academic_setting['marks_submission_status'] == "on")
                         <div class="col-3 mt-3">
                             <a type="button" href="{{route('course.final.mark.submit.show', ['class_id' => $class_id, 'class_name' => request()->query('class_name'), 'section_id' => $section_id, 'section_name' => request()->query('section_name'), 'course_id' => $course_id, 'course_name' => request()->query('course_name'), 'semester_id' => $semester_id])}}" class="btn btn-outline-primary" onclick="return confirm('Are you sure, you want to submit final marks?')"><i class="bi bi-check2"></i> Submit Final Marks</a>
                         </div>
                     @endif
+
                     <form action="{{route('course.mark.store')}}" method="POST">
                         @csrf
                         <input type="hidden" name="session_id" value="{{$current_school_session_id}}">
                         <div class="row mt-3">
                             <div class="col">
                                 <div class="table-responsive">
-                                    
-                                    <table class="table table-hover">
+                                    <table class="table table-hover table-bordered align-middle" id="deped-grading-table">
                                         <thead>
-                                            <tr>
-                                            <th scope="col">Student Name</th>
-                                            @isset($exams)
-                                                @foreach ($exams as $exam)
-                                                <th scope="col"><a href="{{route('exam.rule.show', ['exam_id' => $exam->id])}}" data-bs-toggle="tooltip" data-bs-placement="top" title="View {{$exam->exam_name}} exam rules">{{$exam->exam_name}}</a></th>
-                                                @endforeach
-                                            @endisset
-                                            <th scope="col">Performance (60%)</th>
-                                            <th scope="col">Examination (40%)</th>
-                                            <th scope="col">Final Grade</th>
+                                            <tr class="table-light">
+                                                <th>Student Name</th>
+                                                <th class="text-center">WW (Score/High)</th>
+                                                <th class="text-center">PT (Score/High)</th>
+                                                <th class="text-center">Exam (Score/High)</th>
+                                                <th class="text-center">Final Grade</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @isset($exams)
-                                                @isset($students_with_marks)
-                                                    @foreach ($students_with_marks as $id => $students_with_mark)
+                                            @foreach ($sectionStudents as $sectionStudent)
+                                                @php
+                                                    $student = $sectionStudent->student;
+                                                    $studentMarks = $marksByStudentByExam[$student->id] ?? [];
+
+                                                    $wwScore = 0;
+                                                    foreach ($writtenExams as $exam) {
+                                                        $wwScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $ptScore = 0;
+                                                    foreach ($performanceExams as $exam) {
+                                                        $ptScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $qaScore = 0;
+                                                    foreach ($quarterlyExams as $exam) {
+                                                        $qaScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $wwHigh = max(count($writtenExams), 1) * 100;
+                                                    $ptHigh = max(count($performanceExams), 1) * 100;
+                                                    $qaHigh = max(count($quarterlyExams), 1) * 100;
+                                                @endphp
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        {{$student->first_name}} {{$student->last_name}}
                                                         @php
-                                                            $markedExamCount = 0;
-                                                        @endphp
-                                                    <tr>
-                                                        <td>{{$students_with_mark[0]->student->first_name}} {{$students_with_mark[0]->student->last_name}}</td>
-                                                        @foreach ($students_with_mark as $st)
-                                                            <td>
-                                                                <input type="number" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]" value="{{$st->marks}}">
-                                                            </td>
-                                                            
-                                                            @php
-                                                                $markedExamCount++;
-                                                            @endphp
-                                                        @endforeach
-                                                        @php
-                                                            $students_with_markCount = count($students_with_mark);
-                                                            $examCount = count($exams);
-                                                            $gt = 0;
-                                                            if($students_with_markCount < $examCount) {
-                                                                $gt = $examCount - $students_with_markCount;
+                                                            if ($wwExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$wwExamId.']" class="store-score-input" data-category="written" value="'.number_format($wwScore, 2, '.', '').'">';
+                                                            }
+                                                            if ($ptExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$ptExamId.']" class="store-score-input" data-category="performance" value="'.number_format($ptScore, 2, '.', '').'">';
+                                                            }
+                                                            if ($qaExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$qaExamId.']" class="store-score-input" data-category="quarterly" value="'.number_format($qaScore, 2, '.', '').'">';
                                                             }
                                                         @endphp
-                                                        @for ($i = 0; $i < $gt; $i++)
-                                                            <td>
-                                                                <input type="number" step="0.01" class="form-control" name="student_mark[{{$students_with_mark[0]->student->id}}][{{$exams[$markedExamCount]->id}}]">
-                                                            </td>
-                                                            @php
-                                                                $markedExamCount++;
-                                                            @endphp
-                                                        @endfor
-                                                        <td>
-                                                            <input type="number" step="0.01" min="0" max="100" class="form-control performance-grade-input" placeholder="0 - 100">
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" step="0.01" min="0" max="100" class="form-control exam-grade-input" placeholder="0 - 100">
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" step="0.01" class="form-control final-grade-input" readonly>
-                                                        </td>
-                                                    </tr>
-                                                    @endforeach
-                                                @endisset
-                                            @endisset
-                                            @if(count($students_with_marks) < 1)
-                                                @foreach ($sectionStudents as $sectionStudent)
-                                                    <tr>
-                                                        <td>{{$sectionStudent->student->first_name}} {{$sectionStudent->student->last_name}}</td>
-                                                        @isset($exams)
-                                                            @foreach ($exams as $exam)
-                                                                <td>
-                                                                    <input type="number" class="form-control" name="student_mark[{{$sectionStudent->student->id}}][{{$exam->id}}]">
-                                                                </td>
-                                                            @endforeach
-                                                        @endisset
-                                                        <td>
-                                                            <input type="number" step="0.01" min="0" max="100" class="form-control performance-grade-input" placeholder="0 - 100">
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" step="0.01" min="0" max="100" class="form-control exam-grade-input" placeholder="0 - 100">
-                                                        </td>
-                                                        <td>
-                                                            <input type="number" step="0.01" class="form-control final-grade-input" readonly>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            @endif
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="written" value="{{number_format($wwScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="written" value="{{number_format($wwHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="performance" value="{{number_format($ptScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="performance" value="{{number_format($ptHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="quarterly" value="{{number_format($qaScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="quarterly" value="{{number_format($qaHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control final-grade-input" readonly>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+
                                             <input type="hidden" name="studentCount" value="{{count($sectionStudents)}}">
                                             <input type="hidden" name="semester_id" value="{{$semester_id}}">
                                             <input type="hidden" name="class_id" value="{{$class_id}}">
@@ -141,32 +167,27 @@
                                     </table>
                                 </div>
                             </div>
-                            
                         </div>
-                        {{-- <div class="row justify-content-between mb-3"> --}}
-                            @if(!$final_marks_submitted && count($exams) > 0)
+
+                        @if(!$final_marks_submitted && count($exams) > 0)
                             <div class="col-3">
                                 <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check2"></i> Save</button>
                             </div>
-                            @else
-                                @if($final_marks_submitted)
+                        @else
+                            @if($final_marks_submitted)
                                 <div class="col-5">
                                     <p class="text-success">
                                         <i class="bi bi-exclamation-diamond-fill me-2"></i> You have submitted Final Marks <i class="bi bi-stars"></i>.
                                     </p>
                                 </div>
-                                @else
+                            @else
                                 <div class="col-5">
                                     <p class="text-primary">
                                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Create Exam to give marks.
                                     </p>
                                 </div>
-                                @endif
                             @endif
-                            {{-- <div class="col-3">
-                                <button type="button" class="btn btn-outline-primary"><i class="bi bi-check2"></i> Submit Marks</button>
-                            </div> --}}
-                        {{-- </div> --}}
+                        @endif
                     </form>
                 </div>
             </div>
@@ -175,49 +196,48 @@
     </div>
 </div>
 <script>
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  return new bootstrap.Tooltip(tooltipTriggerEl)
-})
-
-function calculateWeightedGrade(row) {
-    const performanceInput = row.querySelector('.performance-grade-input');
-    const examInput = row.querySelector('.exam-grade-input');
-    const finalGradeInput = row.querySelector('.final-grade-input');
-
-    if (!performanceInput || !examInput || !finalGradeInput) {
-        return;
+(function () {
+    function toNumber(value) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
     }
 
-    const performance = parseFloat(performanceInput.value);
-    const exam = parseFloat(examInput.value);
+    function calculateRow(row) {
+        const wwScore = toNumber(row.querySelector('.category-score[data-category="written"]')?.value);
+        const wwHighest = toNumber(row.querySelector('.category-high[data-category="written"]')?.value);
+        const ptScore = toNumber(row.querySelector('.category-score[data-category="performance"]')?.value);
+        const ptHighest = toNumber(row.querySelector('.category-high[data-category="performance"]')?.value);
+        const qaScore = toNumber(row.querySelector('.category-score[data-category="quarterly"]')?.value);
+        const qaHighest = toNumber(row.querySelector('.category-high[data-category="quarterly"]')?.value);
 
-    if (isNaN(performance) && isNaN(exam)) {
-        finalGradeInput.value = '';
-        return;
+        const wwPS = wwHighest > 0 ? (wwScore / wwHighest) * 100 : 0;
+        const ptPS = ptHighest > 0 ? (ptScore / ptHighest) * 100 : 0;
+        const qaPS = qaHighest > 0 ? (qaScore / qaHighest) * 100 : 0;
+
+        const IG = (wwPS * 0.40) + (ptPS * 0.40) + (qaPS * 0.20);
+        const finalGrade = Math.round(IG);
+
+        const finalGradeInput = row.querySelector('.final-grade-input');
+        if (finalGradeInput) {
+            finalGradeInput.value = finalGrade;
+        }
+
+        const wwStoreInput = row.querySelector('.store-score-input[data-category="written"]');
+        const ptStoreInput = row.querySelector('.store-score-input[data-category="performance"]');
+        const qaStoreInput = row.querySelector('.store-score-input[data-category="quarterly"]');
+
+        if (wwStoreInput) wwStoreInput.value = wwScore.toFixed(2);
+        if (ptStoreInput) ptStoreInput.value = ptScore.toFixed(2);
+        if (qaStoreInput) qaStoreInput.value = qaScore.toFixed(2);
     }
 
-    const safePerformance = isNaN(performance) ? 0 : performance;
-    const safeExam = isNaN(exam) ? 0 : exam;
-    const weighted = (safePerformance * 0.60) + (safeExam * 0.40);
-    finalGradeInput.value = weighted.toFixed(2);
-}
-
-document.querySelectorAll('table tbody tr').forEach(function (row) {
-    const performanceInput = row.querySelector('.performance-grade-input');
-    const examInput = row.querySelector('.exam-grade-input');
-
-    if (performanceInput) {
-        performanceInput.addEventListener('input', function () {
-            calculateWeightedGrade(row);
+    document.querySelectorAll('#deped-grading-table tbody tr').forEach((row) => {
+        row.querySelectorAll('.category-score, .category-high').forEach((input) => {
+            input.addEventListener('input', () => calculateRow(row));
         });
-    }
 
-    if (examInput) {
-        examInput.addEventListener('input', function () {
-            calculateWeightedGrade(row);
-        });
-    }
-});
+        calculateRow(row);
+    });
+})();
 </script>
 @endsection
