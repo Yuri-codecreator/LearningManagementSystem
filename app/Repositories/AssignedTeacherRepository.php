@@ -21,10 +21,14 @@ class AssignedTeacherRepository implements AssignedTeacherInterface {
             $semester_id = Semester::where('session_id', $session_id)
             ->first()->id;
         }
-        return AssignedTeacher::with(['course', 'schoolClass', 'section'])->where('session_id', $session_id)
+        return AssignedTeacher::with(['course', 'schoolClass', 'section'])
+                        ->where('session_id', $session_id)
                         ->where('teacher_id', $teacher_id)
                         ->where('semester_id', $semester_id)
-                        ->get(); 
+                        ->whereHas('course')
+                        ->whereHas('schoolClass')
+                        ->whereHas('section')
+                        ->get();
     }
 
     public function getAssignedTeacher($session_id, $semester_id, $class_id, $section_id, $course_id) {
