@@ -39,6 +39,13 @@
                                             <div class="btn-group" role="group">
                                                 <a href="{{route('exam.grade.system.rule.create', ['grading_system_id' => $gradingSystem->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus"></i> Add Rule</a>
                                                 <a href="{{route('exam.grade.system.rule.show', ['grading_system_id' => $gradingSystem->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> View Rules</a>
+                                                @can('delete grading systems')
+                                                <a href="{{route('exam.grade.system.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this grading system?')) document.getElementById('grading-system-delete-form-{{$gradingSystem->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                <form id="grading-system-delete-form-{{$gradingSystem->id}}" action="{{route('exam.grade.system.delete')}}" method="POST" class="d-none">
+                                                    @csrf
+                                                    <input type="hidden" name="grading_system_id" value="{{$gradingSystem->id}}">
+                                                </form>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

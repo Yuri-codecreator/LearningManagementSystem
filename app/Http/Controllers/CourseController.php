@@ -127,8 +127,14 @@ class CourseController extends Controller
      * @param  \App\Models\Course  $course
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Course $course)
+    public function destroy(Request $request)
     {
-        //
+        try {
+            $this->schoolCourseRepository->delete($request->course_id);
+
+            return back()->with('status', 'Course deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }

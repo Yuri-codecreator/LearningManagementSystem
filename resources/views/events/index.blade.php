@@ -8,6 +8,7 @@
             <div class="row pt-2">
                 <div class="col ps-4">
                     <h1 class="display-6 mb-3"><i class="bi bi-calendar-event"></i> Create Events</h1>
+                    <p class="text-muted">Tip: click any event on the calendar to delete it.</p>
                     <div class="row bg-white p-4 shadow-sm">
                         @include('components.events.event-calendar', ['editable' => 'true', 'selectable' => 'true'])
                     </div>

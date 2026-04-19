@@ -26,4 +26,12 @@ class GradingSystemRepository {
                     ->where('class_id', $class_id)
                     ->first();
     }
+
+    public function delete($id) {
+        try {
+            GradingSystem::destroy($id);
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete grading system. '.$e->getMessage());
+        }
+    }
 }

@@ -68,13 +68,13 @@
                                                 <div class="btn-group" role="group">
                                                     <a href="{{route('exam.rule.create', ['exam_id' => $exam->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus"></i> Add Rule</a>
                                                     <a href="{{route('exam.rule.show', ['exam_id' => $exam->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> View Rule</a>
-                                                    {{-- <a href="{{route('exam.edit', ['exam_id' => $exam->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-pen"></i> Edit</a> --}}
-                                                    {{-- <a href="{{route('exam.delete')}}" role="button" class="btn btn-sm btn-primary" onclick="event.preventDefault();
-                                                        document.getElementById('exam-delete-form-{{$exam->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                    @can('delete exams')
+                                                    <a href="{{route('exam.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this exam?')) document.getElementById('exam-delete-form-{{$exam->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
                                                     <form id="exam-delete-form-{{$exam->id}}" action="{{ route('exam.delete') }}" method="POST" class="d-none">
                                                         @csrf
                                                         <input type="hidden" name="exam_id" value="{{$exam->id}}">
-                                                    </form> --}}
+                                                    </form>
+                                                    @endcan
                                                 </div>
                                             </td>
                                         </tr>

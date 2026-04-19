@@ -3,6 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Models\Promotion;
+use App\Models\AssignedTeacher;
+use App\Models\StudentParentInfo;
+use App\Models\StudentAcademicInfo;
 use App\Traits\Base64ToFile;
 use App\Interfaces\UserInterface;
 use App\Models\SchoolClass;
@@ -234,6 +238,30 @@ class UserRepository implements UserInterface {
             ]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to change password. '.$e->getMessage());
+        }
+    }
+
+    public function deleteTeacher($teacher_id) {
+        try {
+            DB::transaction(function () use ($teacher_id) {
+                AssignedTeacher::where('teacher_id', $teacher_id)->delete();
+                User::where('id', $teacher_id)->where('role', 'teacher')->delete();
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete Teacher. '.$e->getMessage());
+        }
+    }
+
+    public function deleteStudent($student_id) {
+        try {
+            DB::transaction(function () use ($student_id) {
+                Promotion::where('student_id', $student_id)->delete();
+                StudentParentInfo::where('student_id', $student_id)->delete();
+                StudentAcademicInfo::where('student_id', $student_id)->delete();
+                User::where('id', $student_id)->where('role', 'student')->delete();
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete Student. '.$e->getMessage());
         }
     }
 }

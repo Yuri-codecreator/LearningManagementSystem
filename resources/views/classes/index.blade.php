@@ -91,6 +91,13 @@
                                                             <td>
                                                                 <div class="btn-group" role="group">
                                                                     <a href="{{asset('storage/'.$syllabus->syllabus_file_path)}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                    @can('delete syllabi')
+                                                                    <a href="{{route('syllabus.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this syllabus?')) document.getElementById('syllabus-delete-form-{{$syllabus->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                                    <form id="syllabus-delete-form-{{$syllabus->id}}" action="{{route('syllabus.delete')}}" method="POST" class="d-none">
+                                                                        @csrf
+                                                                        <input type="hidden" name="syllabus_id" value="{{$syllabus->id}}">
+                                                                    </form>
+                                                                    @endcan
                                                                 </div>
                                                             </td>
                                                             </tr>
@@ -117,6 +124,11 @@
                                                                 <td>
                                                                     @can('edit courses')
                                                                     <a href="{{route('course.edit', ['id' => $course->id])}}" class="btn btn-sm btn-outline-primary" role="button"><i class="bi bi-pencil"></i> Edit</a>
+                                                                    <a href="{{route('course.delete')}}" class="btn btn-sm btn-outline-danger" role="button" onclick="event.preventDefault(); if(confirm('Delete this course?')) document.getElementById('course-delete-form-{{$course->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                                    <form id="course-delete-form-{{$course->id}}" action="{{route('course.delete')}}" method="POST" class="d-none">
+                                                                        @csrf
+                                                                        <input type="hidden" name="course_id" value="{{$course->id}}">
+                                                                    </form>
                                                                     @endcan
                                                                 </td>
                                                             </tr>

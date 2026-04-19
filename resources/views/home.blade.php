@@ -129,7 +129,18 @@
                                                     </button>
                                                 </h2>
                                                 <div id="flush-collapse{{$notice->id}}" class="accordion-collapse collapse {{($loop->first)?"show":"hide"}}" aria-labelledby="flush-heading{{$notice->id}}" data-bs-parent="#noticeAccordion">
-                                                    <div class="accordion-body overflow-auto">{!!Purify::clean($notice->notice)!!}</div>
+                                                    <div class="accordion-body overflow-auto">
+                                                        {!!Purify::clean($notice->notice)!!}
+                                                        @can('delete notices')
+                                                        <div class="mt-3">
+                                                            <a href="{{route('notice.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this notice?')) document.getElementById('notice-delete-form-{{$notice->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
+                                                            <form id="notice-delete-form-{{$notice->id}}" action="{{route('notice.delete')}}" method="POST" class="d-none">
+                                                                @csrf
+                                                                <input type="hidden" name="notice_id" value="{{$notice->id}}">
+                                                            </form>
+                                                        </div>
+                                                        @endcan
+                                                    </div>
                                                 </div>
                                             </div>
                                             @endforeach
