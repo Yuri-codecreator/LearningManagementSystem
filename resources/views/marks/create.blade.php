@@ -30,6 +30,13 @@
                             if (strpos($examName, 'quarterly') !== false || strpos($examName, 'assessment') !== false || preg_match('/\bqa\b/i', $exam->exam_name) || strpos($examName, 'exam') !== false) {
                                 $quarterlyExams[] = $exam;
                             } elseif (strpos($examName, 'performance') !== false || strpos($examName, 'project') !== false || strpos($examName, 'task') !== false || preg_match('/\bpt\b/i', $exam->exam_name) || strpos($examName, 'practical') !== false) {
+
+                            if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name) || str_contains($examName, 'exam')) {
+
+                         if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name)) {
+
+                                $quarterlyExams[] = $exam;
+                            } elseif (str_contains($examName, 'performance') || str_contains($examName, 'project') || str_contains($examName, 'task') || preg_match('/\bpt\b/i', $exam->exam_name) || str_contains($examName, 'practical')) {
                                 $performanceExams[] = $exam;
                             } else {
                                 $writtenExams[] = $exam;
@@ -37,6 +44,7 @@
                         }
 
                         if (count($quarterlyExams) === 0 && count($exams) > 0) {
+
                             $quarterlyExams[] = $exams[count($exams) - 1];
                         }
 
@@ -48,6 +56,18 @@
                         foreach ($students_with_marks as $studentId => $studentMarks) {
                             foreach ($studentMarks as $studentMark) {
                                 $marksByStudentByExam[$studentId][$studentMark->exam_id] = (float) $studentMark->marks;
+
+                            $lastExam = $exams[count($exams) - 1];
+                            $writtenExams = array_values(array_filter($writtenExams, fn ($exam) => $exam->id !== $lastExam->id));
+                            $performanceExams = array_values(array_filter($performanceExams, fn ($exam) => $exam->id !== $lastExam->id));
+                            $quarterlyExams[] = $lastExam;
+                        }
+
+                        $marksByStudentByExam = [];
+                        foreach ($students_with_marks as $studentId => $studentMarks) {
+                            foreach ($studentMarks as $studentMark) {
+                                $marksByStudentByExam[$studentId][$studentMark->exam_id] = $studentMark->marks;
+
                             }
                         }
                     @endphp
@@ -59,6 +79,11 @@
                     @endif
                     <p class="text-primary">
                         <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
+
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
+
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd-style encoding enabled: Written Works (40%), Performance Tasks (40%), Quarterly Assessment (20%). PS = Percentage Score, WS = Weighted Score.
+
                     </p>
 
                     @if ($final_marks_submitted)
@@ -84,11 +109,76 @@
                                     <table class="table table-hover table-bordered align-middle" id="deped-grading-table">
                                         <thead>
                                             <tr class="table-light">
+
                                                 <th>Student Name</th>
                                                 <th class="text-center">WW (Score/High)</th>
                                                 <th class="text-center">PT (Score/High)</th>
                                                 <th class="text-center">Exam (Score/High)</th>
                                                 <th class="text-center">Final Grade</th>
+
+                                                <th scope="col" rowspan="2" class="text-nowrap">Learner's Name</th>
+                                                <th scope="col" colspan="{{max(count($writtenExams), 1) + 3}}" class="text-center">Written Works (40%)</th>
+                                                <th scope="col" colspan="{{max(count($performanceExams), 1) + 3}}" class="text-center">Performance Tasks (40%)</th>
+                                                <th scope="col" colspan="{{max(count($quarterlyExams), 1) + 2}}" class="text-center">Quarterly Assessment (20%)</th>
+                                                <th scope="col" rowspan="2" class="text-nowrap text-center">Initial Grade</th>
+                                            </tr>
+                                            <tr class="table-light">
+                                                @forelse($writtenExams as $exam)
+                                                    <th scope="col" class="text-nowrap">{{$exam->exam_name}}</th>
+                                                @empty
+                                                    <th scope="col" class="text-nowrap">No WW exam</th>
+                                                @endforelse
+                                                <th scope="col" class="text-center">Total</th>
+                                                <th scope="col" class="text-center">PS</th>
+                                                <th scope="col" class="text-center">WS</th>
+
+                                                @forelse($performanceExams as $exam)
+                                                    <th scope="col" class="text-nowrap">{{$exam->exam_name}}</th>
+                                                @empty
+                                                    <th scope="col" class="text-nowrap">No PT exam</th>
+                                                @endforelse
+                                                <th scope="col" class="text-center">Total</th>
+                                                <th scope="col" class="text-center">PS</th>
+                                                <th scope="col" class="text-center">WS</th>
+
+                                                @forelse($quarterlyExams as $exam)
+                                                    <th scope="col" class="text-nowrap">{{$exam->exam_name}}</th>
+                                                @empty
+                                                    <th scope="col" class="text-nowrap">No QA exam</th>
+                                                @endforelse
+                                                <th scope="col" class="text-center">PS</th>
+                                                <th scope="col" class="text-center">WS</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-end small">Highest Possible Score</th>
+
+                                                @forelse($writtenExams as $exam)
+                                                    <th><input type="number" min="1" step="0.01" class="form-control form-control-sm hps-input" data-category="written" data-exam-id="{{$exam->id}}" value="100"></th>
+                                                @empty
+                                                    <th class="text-center text-muted">-</th>
+                                                @endforelse
+                                                <th></th>
+                                                <th class="small text-center">100.00</th>
+                                                <th class="small text-center">40%</th>
+
+                                                @forelse($performanceExams as $exam)
+                                                    <th><input type="number" min="1" step="0.01" class="form-control form-control-sm hps-input" data-category="performance" data-exam-id="{{$exam->id}}" value="100"></th>
+                                                @empty
+                                                    <th class="text-center text-muted">-</th>
+                                                @endforelse
+                                                <th></th>
+                                                <th class="small text-center">100.00</th>
+                                                <th class="small text-center">40%</th>
+
+                                                @forelse($quarterlyExams as $exam)
+                                                    <th><input type="number" min="1" step="0.01" class="form-control form-control-sm hps-input" data-category="quarterly" data-exam-id="{{$exam->id}}" value="100"></th>
+                                                @empty
+                                                    <th class="text-center text-muted">-</th>
+                                                @endforelse
+                                                <th class="small text-center">100.00</th>
+                                                <th class="small text-center">20%</th>
+                                                <th></th>
+
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -96,6 +186,7 @@
                                                 @php
                                                     $student = $sectionStudent->student;
                                                     $studentMarks = $marksByStudentByExam[$student->id] ?? [];
+
 
                                                     $wwScore = 0;
                                                     foreach ($writtenExams as $exam) {
@@ -130,6 +221,15 @@
                                                                 echo '<input type="hidden" name="student_mark['.$student->id.']['.$qaExamId.']" class="store-score-input" data-category="quarterly" value="'.number_format($qaScore, 2, '.', '').'">';
                                                             }
                                                         @endphp
+                                                        @if($wwExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$wwExamId}}]" class="store-score-input" data-category="written" value="{{number_format($wwScore, 2, '.', '')}}">
+                                                        @endif
+                                                        @if($ptExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$ptExamId}}]" class="store-score-input" data-category="performance" value="{{number_format($ptScore, 2, '.', '')}}">
+                                                        @endif
+                                                        @if($qaExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$qaExamId}}]" class="store-score-input" data-category="quarterly" value="{{number_format($qaScore, 2, '.', '')}}">
+                                                        @endif
                                                     </td>
                                                     <td>
                                                         <div class="d-flex gap-2 align-items-center">
@@ -155,6 +255,45 @@
                                                     <td>
                                                         <input type="number" class="form-control final-grade-input" readonly>
                                                     </td>
+
+                                                @endphp
+                                                <tr>
+                                                    <td class="text-nowrap">{{$student->first_name}} {{$student->last_name}}</td>
+
+                                                    @forelse($writtenExams as $exam)
+                                                        <td>
+                                                            <input type="number" step="0.01" class="form-control score-input" data-category="written" data-exam-id="{{$exam->id}}" name="student_mark[{{$student->id}}][{{$exam->id}}]" value="{{$studentMarks[$exam->id] ?? ''}}">
+                                                        </td>
+                                                    @empty
+                                                        <td class="text-center text-muted">-</td>
+                                                    @endforelse
+                                                    <td><input type="number" step="0.01" class="form-control total-input" data-category="written" readonly></td>
+                                                    <td><input type="number" step="0.01" class="form-control ps-input" data-category="written" readonly></td>
+                                                    <td><input type="number" step="0.01" class="form-control ws-input" data-category="written" readonly></td>
+
+                                                    @forelse($performanceExams as $exam)
+                                                        <td>
+                                                            <input type="number" step="0.01" class="form-control score-input" data-category="performance" data-exam-id="{{$exam->id}}" name="student_mark[{{$student->id}}][{{$exam->id}}]" value="{{$studentMarks[$exam->id] ?? ''}}">
+                                                        </td>
+                                                    @empty
+                                                        <td class="text-center text-muted">-</td>
+                                                    @endforelse
+                                                    <td><input type="number" step="0.01" class="form-control total-input" data-category="performance" readonly></td>
+                                                    <td><input type="number" step="0.01" class="form-control ps-input" data-category="performance" readonly></td>
+                                                    <td><input type="number" step="0.01" class="form-control ws-input" data-category="performance" readonly></td>
+
+                                                    @forelse($quarterlyExams as $exam)
+                                                        <td>
+                                                            <input type="number" step="0.01" class="form-control score-input" data-category="quarterly" data-exam-id="{{$exam->id}}" name="student_mark[{{$student->id}}][{{$exam->id}}]" value="{{$studentMarks[$exam->id] ?? ''}}">
+                                                        </td>
+                                                    @empty
+                                                        <td class="text-center text-muted">-</td>
+                                                    @endforelse
+                                                    <td><input type="number" step="0.01" class="form-control ps-input" data-category="quarterly" readonly></td>
+                                                    <td><input type="number" step="0.01" class="form-control ws-input" data-category="quarterly" readonly></td>
+
+                                                    <td><input type="number" step="0.01" class="form-control initial-grade-input" readonly></td>
+
                                                 </tr>
                                             @endforeach
 
@@ -197,6 +336,39 @@
 </div>
 <script>
 (function () {
+    function toNumber(value) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function calculateRow(row) {
+        const wwScore = toNumber(row.querySelector('.category-score[data-category="written"]')?.value);
+        const wwHighest = toNumber(row.querySelector('.category-high[data-category="written"]')?.value);
+        const ptScore = toNumber(row.querySelector('.category-score[data-category="performance"]')?.value);
+        const ptHighest = toNumber(row.querySelector('.category-high[data-category="performance"]')?.value);
+        const qaScore = toNumber(row.querySelector('.category-score[data-category="quarterly"]')?.value);
+        const qaHighest = toNumber(row.querySelector('.category-high[data-category="quarterly"]')?.value);
+
+        const wwPS = wwHighest > 0 ? (wwScore / wwHighest) * 100 : 0;
+        const ptPS = ptHighest > 0 ? (ptScore / ptHighest) * 100 : 0;
+        const qaPS = qaHighest > 0 ? (qaScore / qaHighest) * 100 : 0;
+
+        const IG = (wwPS * 0.40) + (ptPS * 0.40) + (qaPS * 0.20);
+        const finalGrade = Math.round(IG);
+
+        const finalGradeInput = row.querySelector('.final-grade-input');
+        if (finalGradeInput) {
+            finalGradeInput.value = finalGrade;
+        }
+
+
+
+    const categoryWeights = {
+        written: 0.40,
+        performance: 0.40,
+        quarterly: 0.20,
+    };
+
     function toNumber(value) {
         const parsed = parseFloat(value);
         return Number.isFinite(parsed) ? parsed : 0;
