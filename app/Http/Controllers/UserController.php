@@ -12,6 +12,7 @@ use App\Repositories\PromotionRepository;
 use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\TeacherStoreRequest;
 use App\Models\FinalMark;
+use App\Models\Mark;
 use App\Interfaces\SchoolSessionInterface;
 use App\Repositories\GradeRuleRepository;
 use App\Repositories\GradingSystemRepository;
@@ -146,7 +147,73 @@ class UserController extends Controller
         $data = [
             'student' => $student,
             'final_marks' => $finalMarks,
+            'course_performance' => [],
         ];
+
+        $marks = Mark::with(['course', 'exam.semester'])
+            ->where('session_id', $current_school_session_id)
+            ->where('student_id', $id)
+            ->when($class_id > 0, function ($query) use ($class_id) {
+                $query->where('class_id', $class_id);
+            })
+            ->when($section_id > 0, function ($query) use ($section_id) {
+                $query->where('section_id', $section_id);
+            })
+            ->get();
+
+        $coursePerformance = [];
+
+        foreach ($marks as $mark) {
+            $semester_id = optional($mark->exam)->semester_id ?? 0;
+            $course_id = $mark->course_id ?? 0;
+            $key = $semester_id.'-'.$course_id;
+
+            if (!isset($coursePerformance[$key])) {
+                $coursePerformance[$key] = [
+                    'semester_name' => optional(optional($mark->exam)->semester)->semester_name ?? 'N/A',
+                    'course_name' => optional($mark->course)->course_name ?? 'N/A',
+                    'exam_marks' => [],
+                    'calculated_marks' => '-',
+                    'final_marks' => '-',
+                    'grade' => '-',
+                    'point' => '-',
+                    'note' => '-',
+                ];
+            }
+
+            $coursePerformance[$key]['exam_marks'][] = [
+                'exam_name' => optional($mark->exam)->exam_name ?? 'Exam',
+                'marks' => $mark->marks,
+            ];
+        }
+
+        foreach ($finalMarks as $finalMark) {
+            $key = $finalMark->semester_id.'-'.$finalMark->course_id;
+
+            if (!isset($coursePerformance[$key])) {
+                $coursePerformance[$key] = [
+                    'semester_name' => optional($finalMark->semester)->semester_name ?? 'N/A',
+                    'course_name' => optional($finalMark->course)->course_name ?? 'N/A',
+                    'exam_marks' => [],
+                    'calculated_marks' => '-',
+                    'final_marks' => '-',
+                    'grade' => '-',
+                    'point' => '-',
+                    'note' => '-',
+                ];
+            }
+
+            $coursePerformance[$key]['calculated_marks'] = $finalMark->calculated_marks;
+            $coursePerformance[$key]['final_marks'] = $finalMark->final_marks;
+            $coursePerformance[$key]['grade'] = $finalMark->getAttribute('grade');
+            $coursePerformance[$key]['point'] = $finalMark->getAttribute('point');
+            $coursePerformance[$key]['note'] = $finalMark->note ?? '-';
+        }
+
+        $data['course_performance'] = collect($coursePerformance)->sortBy([
+            ['semester_name', 'asc'],
+            ['course_name', 'asc'],
+        ]);
 
         return view('students.grades', $data);
     }

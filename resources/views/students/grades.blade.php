@@ -28,6 +28,7 @@
                                 <tr>
                                     <th scope="col">Semester</th>
                                     <th scope="col">Course</th>
+                                    <th scope="col">Teacher Added Marks</th>
                                     <th scope="col">Calculated Marks</th>
                                     <th scope="col">Final Grade (Marks)</th>
                                     <th scope="col">Letter Grade</th>
@@ -36,19 +37,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($final_marks as $mark)
+                                @forelse ($course_performance as $performance)
                                 <tr>
-                                    <td>{{optional($mark->semester)->semester_name ?? 'N/A'}}</td>
-                                    <td>{{optional($mark->course)->course_name ?? 'N/A'}}</td>
-                                    <td>{{$mark->calculated_marks}}</td>
-                                    <td>{{$mark->final_marks}}</td>
-                                    <td>{{$mark->getAttribute('grade')}}</td>
-                                    <td>{{$mark->getAttribute('point')}}</td>
-                                    <td>{{$mark->note ?? '-'}}</td>
+                                    <td>{{$performance['semester_name']}}</td>
+                                    <td>{{$performance['course_name']}}</td>
+                                    <td>
+                                        @if(count($performance['exam_marks']) > 0)
+                                            @foreach ($performance['exam_marks'] as $examMark)
+                                                <span class="badge text-bg-light border me-1 mb-1">
+                                                    {{$examMark['exam_name']}}: {{$examMark['marks']}}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <span class="text-muted">No exam marks</span>
+                                        @endif
+                                    </td>
+                                    <td>{{$performance['calculated_marks']}}</td>
+                                    <td>{{$performance['final_marks']}}</td>
+                                    <td>{{$performance['grade']}}</td>
+                                    <td>{{$performance['point']}}</td>
+                                    <td>{{$performance['note']}}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted">No final grades found for this student in the selected class/section.</td>
+                                    <td colspan="8" class="text-center text-muted">No marks or final grades found for this student in the selected class/section.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
