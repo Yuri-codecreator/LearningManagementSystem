@@ -27,7 +27,11 @@
                         foreach ($exams as $exam) {
                             $examName = strtolower($exam->exam_name);
 
-                            if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name)) {
+
+                            if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name) || str_contains($examName, 'exam')) {
+
+                         if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name)) {
+
                                 $quarterlyExams[] = $exam;
                             } elseif (str_contains($examName, 'performance') || str_contains($examName, 'project') || str_contains($examName, 'task') || preg_match('/\bpt\b/i', $exam->exam_name) || str_contains($examName, 'practical')) {
                                 $performanceExams[] = $exam;
@@ -37,6 +41,19 @@
                         }
 
                         if (count($quarterlyExams) === 0 && count($exams) > 0) {
+
+                            $quarterlyExams[] = $exams[count($exams) - 1];
+                        }
+
+                        $wwExamId = count($writtenExams) > 0 ? $writtenExams[0]->id : null;
+                        $ptExamId = count($performanceExams) > 0 ? $performanceExams[0]->id : null;
+                        $qaExamId = count($quarterlyExams) > 0 ? $quarterlyExams[0]->id : null;
+
+                        $marksByStudentByExam = [];
+                        foreach ($students_with_marks as $studentId => $studentMarks) {
+                            foreach ($studentMarks as $studentMark) {
+                                $marksByStudentByExam[$studentId][$studentMark->exam_id] = (float) $studentMark->marks;
+
                             $lastExam = $exams[count($exams) - 1];
                             $writtenExams = array_values(array_filter($writtenExams, fn ($exam) => $exam->id !== $lastExam->id));
                             $performanceExams = array_values(array_filter($performanceExams, fn ($exam) => $exam->id !== $lastExam->id));
@@ -47,6 +64,7 @@
                         foreach ($students_with_marks as $studentId => $studentMarks) {
                             foreach ($studentMarks as $studentMark) {
                                 $marksByStudentByExam[$studentId][$studentMark->exam_id] = $studentMark->marks;
+
                             }
                         }
                     @endphp
@@ -57,8 +75,13 @@
                     </p>
                     @endif
                     <p class="text-primary">
+
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
+
                         <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd-style encoding enabled: Written Works (40%), Performance Tasks (40%), Quarterly Assessment (20%). PS = Percentage Score, WS = Weighted Score.
+
                     </p>
+
                     @if ($final_marks_submitted)
                     <p class="text-success">
                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Marks are submitted.
@@ -82,6 +105,13 @@
                                     <table class="table table-hover table-bordered align-middle" id="deped-grading-table">
                                         <thead>
                                             <tr class="table-light">
+
+                                                <th>Student Name</th>
+                                                <th class="text-center">WW (Score/High)</th>
+                                                <th class="text-center">PT (Score/High)</th>
+                                                <th class="text-center">Exam (Score/High)</th>
+                                                <th class="text-center">Final Grade</th>
+
                                                 <th scope="col" rowspan="2" class="text-nowrap">Learner's Name</th>
                                                 <th scope="col" colspan="{{max(count($writtenExams), 1) + 3}}" class="text-center">Written Works (40%)</th>
                                                 <th scope="col" colspan="{{max(count($performanceExams), 1) + 3}}" class="text-center">Performance Tasks (40%)</th>
@@ -144,6 +174,7 @@
                                                 <th class="small text-center">100.00</th>
                                                 <th class="small text-center">20%</th>
                                                 <th></th>
+
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -151,6 +182,65 @@
                                                 @php
                                                     $student = $sectionStudent->student;
                                                     $studentMarks = $marksByStudentByExam[$student->id] ?? [];
+
+
+                                                    $wwScore = 0;
+                                                    foreach ($writtenExams as $exam) {
+                                                        $wwScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $ptScore = 0;
+                                                    foreach ($performanceExams as $exam) {
+                                                        $ptScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $qaScore = 0;
+                                                    foreach ($quarterlyExams as $exam) {
+                                                        $qaScore += $studentMarks[$exam->id] ?? 0;
+                                                    }
+
+                                                    $wwHigh = max(count($writtenExams), 1) * 100;
+                                                    $ptHigh = max(count($performanceExams), 1) * 100;
+                                                    $qaHigh = max(count($quarterlyExams), 1) * 100;
+                                                @endphp
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        {{$student->first_name}} {{$student->last_name}}
+                                                        @if($wwExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$wwExamId}}]" class="store-score-input" data-category="written" value="{{number_format($wwScore, 2, '.', '')}}">
+                                                        @endif
+                                                        @if($ptExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$ptExamId}}]" class="store-score-input" data-category="performance" value="{{number_format($ptScore, 2, '.', '')}}">
+                                                        @endif
+                                                        @if($qaExamId)
+                                                            <input type="hidden" name="student_mark[{{$student->id}}][{{$qaExamId}}]" class="store-score-input" data-category="quarterly" value="{{number_format($qaScore, 2, '.', '')}}">
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="written" value="{{number_format($wwScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="written" value="{{number_format($wwHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="performance" value="{{number_format($ptScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="performance" value="{{number_format($ptHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2 align-items-center">
+                                                            <input type="number" step="0.01" min="0" class="form-control category-score" data-category="quarterly" value="{{number_format($qaScore, 2, '.', '')}}">
+                                                            <span>/</span>
+                                                            <input type="number" step="0.01" min="1" class="form-control category-high" data-category="quarterly" value="{{number_format($qaHigh, 2, '.', '')}}">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control final-grade-input" readonly>
+                                                    </td>
+
                                                 @endphp
                                                 <tr>
                                                     <td class="text-nowrap">{{$student->first_name}} {{$student->last_name}}</td>
@@ -188,6 +278,7 @@
                                                     <td><input type="number" step="0.01" class="form-control ws-input" data-category="quarterly" readonly></td>
 
                                                     <td><input type="number" step="0.01" class="form-control initial-grade-input" readonly></td>
+
                                                 </tr>
                                             @endforeach
 
@@ -230,6 +321,8 @@
 </div>
 <script>
 (function () {
+
+
     const categoryWeights = {
         written: 0.40,
         performance: 0.40,
@@ -241,65 +334,42 @@
         return Number.isFinite(parsed) ? parsed : 0;
     }
 
-    function getCategoryHpsTotal(category) {
-        return Array.from(document.querySelectorAll(`.hps-input[data-category="${category}"]`))
-            .reduce((sum, input) => sum + Math.max(toNumber(input.value), 0), 0);
-    }
-
-    function calculateCategory(row, category) {
-        const scoreInputs = row.querySelectorAll(`.score-input[data-category="${category}"]`);
-        const total = Array.from(scoreInputs).reduce((sum, input) => sum + Math.max(toNumber(input.value), 0), 0);
-        const hpsTotal = getCategoryHpsTotal(category);
-
-        const totalInput = row.querySelector(`.total-input[data-category="${category}"]`);
-        const psInput = row.querySelector(`.ps-input[data-category="${category}"]`);
-        const wsInput = row.querySelector(`.ws-input[data-category="${category}"]`);
-
-        const ps = hpsTotal > 0 ? (total / hpsTotal) * 100 : 0;
-        const ws = ps * categoryWeights[category];
-
-        if (totalInput) {
-            totalInput.value = total.toFixed(2);
-        }
-        if (psInput) {
-            psInput.value = ps.toFixed(2);
-        }
-        if (wsInput) {
-            wsInput.value = ws.toFixed(2);
-        }
-
-        return ws;
-    }
-
     function calculateRow(row) {
-        const writtenWs = calculateCategory(row, 'written');
-        const performanceWs = calculateCategory(row, 'performance');
-        const quarterlyWs = calculateCategory(row, 'quarterly');
-        const initialGradeInput = row.querySelector('.initial-grade-input');
+        const wwScore = toNumber(row.querySelector('.category-score[data-category="written"]')?.value);
+        const wwHighest = toNumber(row.querySelector('.category-high[data-category="written"]')?.value);
+        const ptScore = toNumber(row.querySelector('.category-score[data-category="performance"]')?.value);
+        const ptHighest = toNumber(row.querySelector('.category-high[data-category="performance"]')?.value);
+        const qaScore = toNumber(row.querySelector('.category-score[data-category="quarterly"]')?.value);
+        const qaHighest = toNumber(row.querySelector('.category-high[data-category="quarterly"]')?.value);
 
-        if (initialGradeInput) {
-            initialGradeInput.value = (writtenWs + performanceWs + quarterlyWs).toFixed(2);
+        const wwPS = wwHighest > 0 ? (wwScore / wwHighest) * 100 : 0;
+        const ptPS = ptHighest > 0 ? (ptScore / ptHighest) * 100 : 0;
+        const qaPS = qaHighest > 0 ? (qaScore / qaHighest) * 100 : 0;
+
+        const IG = (wwPS * 0.40) + (ptPS * 0.40) + (qaPS * 0.20);
+        const finalGrade = Math.round(IG);
+
+        const finalGradeInput = row.querySelector('.final-grade-input');
+        if (finalGradeInput) {
+            finalGradeInput.value = finalGrade;
         }
+
+        const wwStoreInput = row.querySelector('.store-score-input[data-category="written"]');
+        const ptStoreInput = row.querySelector('.store-score-input[data-category="performance"]');
+        const qaStoreInput = row.querySelector('.store-score-input[data-category="quarterly"]');
+
+        if (wwStoreInput) wwStoreInput.value = wwScore.toFixed(2);
+        if (ptStoreInput) ptStoreInput.value = ptScore.toFixed(2);
+        if (qaStoreInput) qaStoreInput.value = qaScore.toFixed(2);
     }
 
-    function calculateAllRows() {
-        document.querySelectorAll('#deped-grading-table tbody tr').forEach(calculateRow);
-    }
-
-    document.querySelectorAll('.score-input').forEach((input) => {
-        input.addEventListener('input', (event) => {
-            const row = event.target.closest('tr');
-            if (row) {
-                calculateRow(row);
-            }
+    document.querySelectorAll('#deped-grading-table tbody tr').forEach((row) => {
+        row.querySelectorAll('.category-score, .category-high').forEach((input) => {
+            input.addEventListener('input', () => calculateRow(row));
         });
-    });
 
-    document.querySelectorAll('.hps-input').forEach((input) => {
-        input.addEventListener('input', calculateAllRows);
+        calculateRow(row);
     });
-
-    calculateAllRows();
 })();
 </script>
 @endsection
