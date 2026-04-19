@@ -175,7 +175,11 @@ class UserController extends Controller
     }
 
     public function destroyStudent(Request $request) {
+
+        abort_unless(auth()->user()->can('edit users'), 403);
+
         abort_unless(auth()->user()->can('delete users'), 403);
+
 
         $request->validate([
             'student_id' => 'required|integer'
@@ -191,7 +195,11 @@ class UserController extends Controller
     }
 
     public function destroyTeacher(Request $request) {
+
+        abort_unless(auth()->user()->can('edit users'), 403);
+
         abort_unless(auth()->user()->can('delete users'), 403);
+
 
         $request->validate([
             'teacher_id' => 'required|integer'
