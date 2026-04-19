@@ -26,6 +26,9 @@
                     <p class="text-primary">
                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Final Marks submission should be done only once in a Semester when the Marks Submission Window is open.
                     </p>
+                    <p class="text-primary">
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> Use the worksheet below to input per-student grades in an Excel-style grid. Add performance (60%) and exam (40%) scores for each student.
+                    </p>
                     @if ($final_marks_submitted)
                     <p class="text-success">
                         <i class="bi bi-exclamation-diamond-fill me-2"></i> Marks are submitted.
@@ -54,6 +57,9 @@
                                                 <th scope="col"><a href="{{route('exam.rule.show', ['exam_id' => $exam->id])}}" data-bs-toggle="tooltip" data-bs-placement="top" title="View {{$exam->exam_name}} exam rules">{{$exam->exam_name}}</a></th>
                                                 @endforeach
                                             @endisset
+                                            <th scope="col">Performance (60%)</th>
+                                            <th scope="col">Examination (40%)</th>
+                                            <th scope="col">Final Grade</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -90,6 +96,15 @@
                                                                 $markedExamCount++;
                                                             @endphp
                                                         @endfor
+                                                        <td>
+                                                            <input type="number" step="0.01" min="0" max="100" class="form-control performance-grade-input" placeholder="0 - 100">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" min="0" max="100" class="form-control exam-grade-input" placeholder="0 - 100">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" class="form-control final-grade-input" readonly>
+                                                        </td>
                                                     </tr>
                                                     @endforeach
                                                 @endisset
@@ -105,6 +120,15 @@
                                                                 </td>
                                                             @endforeach
                                                         @endisset
+                                                        <td>
+                                                            <input type="number" step="0.01" min="0" max="100" class="form-control performance-grade-input" placeholder="0 - 100">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" min="0" max="100" class="form-control exam-grade-input" placeholder="0 - 100">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step="0.01" class="form-control final-grade-input" readonly>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             @endif
@@ -155,5 +179,45 @@ var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggl
 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
   return new bootstrap.Tooltip(tooltipTriggerEl)
 })
+
+function calculateWeightedGrade(row) {
+    const performanceInput = row.querySelector('.performance-grade-input');
+    const examInput = row.querySelector('.exam-grade-input');
+    const finalGradeInput = row.querySelector('.final-grade-input');
+
+    if (!performanceInput || !examInput || !finalGradeInput) {
+        return;
+    }
+
+    const performance = parseFloat(performanceInput.value);
+    const exam = parseFloat(examInput.value);
+
+    if (isNaN(performance) && isNaN(exam)) {
+        finalGradeInput.value = '';
+        return;
+    }
+
+    const safePerformance = isNaN(performance) ? 0 : performance;
+    const safeExam = isNaN(exam) ? 0 : exam;
+    const weighted = (safePerformance * 0.60) + (safeExam * 0.40);
+    finalGradeInput.value = weighted.toFixed(2);
+}
+
+document.querySelectorAll('table tbody tr').forEach(function (row) {
+    const performanceInput = row.querySelector('.performance-grade-input');
+    const examInput = row.querySelector('.exam-grade-input');
+
+    if (performanceInput) {
+        performanceInput.addEventListener('input', function () {
+            calculateWeightedGrade(row);
+        });
+    }
+
+    if (examInput) {
+        examInput.addEventListener('input', function () {
+            calculateWeightedGrade(row);
+        });
+    }
+});
 </script>
 @endsection
