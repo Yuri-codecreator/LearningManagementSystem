@@ -11,7 +11,10 @@ use App\Interfaces\SchoolClassInterface;
 use App\Repositories\PromotionRepository;
 use App\Http\Requests\StudentStoreRequest;
 use App\Http\Requests\TeacherStoreRequest;
+use App\Models\FinalMark;
 use App\Interfaces\SchoolSessionInterface;
+use App\Repositories\GradeRuleRepository;
+use App\Repositories\GradingSystemRepository;
 use App\Repositories\StudentParentInfoRepository;
 
 class UserController extends Controller
@@ -88,6 +91,64 @@ class UserController extends Controller
         ];
 
         return view('students.profile', $data);
+    }
+
+    public function showStudentGrades($id, Request $request) {
+        $current_school_session_id = $this->getSchoolCurrentSession();
+        $class_id = (int) $request->query('class_id', 0);
+        $section_id = (int) $request->query('section_id', 0);
+
+        $student = $this->userRepository->findStudent($id);
+        $finalMarks = FinalMark::with(['course', 'semester'])
+            ->where('session_id', $current_school_session_id)
+            ->where('student_id', $id)
+            ->when($class_id > 0, function ($query) use ($class_id) {
+                $query->where('class_id', $class_id);
+            })
+            ->when($section_id > 0, function ($query) use ($section_id) {
+                $query->where('section_id', $section_id);
+            })
+            ->orderBy('semester_id')
+            ->get();
+
+        $gradingSystemRepository = new GradingSystemRepository();
+        $gradeRulesRepository = new GradeRuleRepository();
+        $gradingRulesBySemester = [];
+
+        foreach ($finalMarks as $finalMark) {
+            if (isset($gradingRulesBySemester[$finalMark->semester_id])) {
+                continue;
+            }
+
+            $gradingSystem = $gradingSystemRepository->getGradingSystem($current_school_session_id, $finalMark->semester_id, $finalMark->class_id);
+
+            if (!$gradingSystem) {
+                $gradingRulesBySemester[$finalMark->semester_id] = collect();
+                continue;
+            }
+
+            $gradingRulesBySemester[$finalMark->semester_id] = $gradeRulesRepository->getAll($current_school_session_id, $gradingSystem->id);
+        }
+
+        foreach ($finalMarks as $mark) {
+            $mark['grade'] = '-';
+            $mark['point'] = '-';
+
+            foreach ($gradingRulesBySemester[$mark->semester_id] as $rule) {
+                if ($mark->final_marks >= $rule->start_at && $mark->final_marks <= $rule->end_at) {
+                    $mark['grade'] = $rule->grade;
+                    $mark['point'] = $rule->point;
+                    break;
+                }
+            }
+        }
+
+        $data = [
+            'student' => $student,
+            'final_marks' => $finalMarks,
+        ];
+
+        return view('students.grades', $data);
     }
 
     public function showTeacherProfile($id) {
