@@ -27,6 +27,9 @@
                         foreach ($exams as $exam) {
                             $examName = strtolower($exam->exam_name);
 
+                            if (strpos($examName, 'quarterly') !== false || strpos($examName, 'assessment') !== false || preg_match('/\bqa\b/i', $exam->exam_name) || strpos($examName, 'exam') !== false) {
+                                $quarterlyExams[] = $exam;
+                            } elseif (strpos($examName, 'performance') !== false || strpos($examName, 'project') !== false || strpos($examName, 'task') !== false || preg_match('/\bpt\b/i', $exam->exam_name) || strpos($examName, 'practical') !== false) {
 
                             if (str_contains($examName, 'quarterly') || str_contains($examName, 'assessment') || preg_match('/\bqa\b/i', $exam->exam_name) || str_contains($examName, 'exam')) {
 
@@ -75,6 +78,7 @@
                     </p>
                     @endif
                     <p class="text-primary">
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
 
                         <i class="bi bi-grid-3x3-gap-fill me-2"></i> DepEd formula: WW PS = (WW Score / WW High) × 100, PT PS = (PT Score / PT High) × 100, QA PS = (Exam Score / Exam High) × 100, IG = (WW PS × 0.40) + (PT PS × 0.40) + (QA PS × 0.20), Final Grade = rounded IG.
 
@@ -206,6 +210,17 @@
                                                 <tr>
                                                     <td class="text-nowrap">
                                                         {{$student->first_name}} {{$student->last_name}}
+                                                        @php
+                                                            if ($wwExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$wwExamId.']" class="store-score-input" data-category="written" value="'.number_format($wwScore, 2, '.', '').'">';
+                                                            }
+                                                            if ($ptExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$ptExamId.']" class="store-score-input" data-category="performance" value="'.number_format($ptScore, 2, '.', '').'">';
+                                                            }
+                                                            if ($qaExamId) {
+                                                                echo '<input type="hidden" name="student_mark['.$student->id.']['.$qaExamId.']" class="store-score-input" data-category="quarterly" value="'.number_format($qaScore, 2, '.', '').'">';
+                                                            }
+                                                        @endphp
                                                         @if($wwExamId)
                                                             <input type="hidden" name="student_mark[{{$student->id}}][{{$wwExamId}}]" class="store-score-input" data-category="written" value="{{number_format($wwScore, 2, '.', '')}}">
                                                         @endif
@@ -321,6 +336,31 @@
 </div>
 <script>
 (function () {
+    function toNumber(value) {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function calculateRow(row) {
+        const wwScore = toNumber(row.querySelector('.category-score[data-category="written"]')?.value);
+        const wwHighest = toNumber(row.querySelector('.category-high[data-category="written"]')?.value);
+        const ptScore = toNumber(row.querySelector('.category-score[data-category="performance"]')?.value);
+        const ptHighest = toNumber(row.querySelector('.category-high[data-category="performance"]')?.value);
+        const qaScore = toNumber(row.querySelector('.category-score[data-category="quarterly"]')?.value);
+        const qaHighest = toNumber(row.querySelector('.category-high[data-category="quarterly"]')?.value);
+
+        const wwPS = wwHighest > 0 ? (wwScore / wwHighest) * 100 : 0;
+        const ptPS = ptHighest > 0 ? (ptScore / ptHighest) * 100 : 0;
+        const qaPS = qaHighest > 0 ? (qaScore / qaHighest) * 100 : 0;
+
+        const IG = (wwPS * 0.40) + (ptPS * 0.40) + (qaPS * 0.20);
+        const finalGrade = Math.round(IG);
+
+        const finalGradeInput = row.querySelector('.final-grade-input');
+        if (finalGradeInput) {
+            finalGradeInput.value = finalGrade;
+        }
+
 
 
     const categoryWeights = {
