@@ -49,10 +49,10 @@
                                             <a href="{{route('teacher.edit.show', ['id' => $teacher->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-pen"></i> Edit</a>
                                             @endcan
                                             @can('delete users')
-                                            <a href="{{route('teacher.delete')}}" role="button" class="btn btn-sm btn-outline-danger" onclick="event.preventDefault(); if(confirm('Delete this teacher?')) document.getElementById('teacher-delete-form-{{$teacher->id}}').submit();"><i class="bi bi-trash2"></i> Delete</a>
-                                            <form id="teacher-delete-form-{{$teacher->id}}" action="{{ route('teacher.delete') }}" method="POST" class="d-none">
+                                            <form action="{{ route('teacher.delete') }}" method="POST" class="d-inline-block" onsubmit="return confirm('Delete this teacher?')">
                                                 @csrf
                                                 <input type="hidden" name="teacher_id" value="{{$teacher->id}}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash2"></i> Delete</button>
                                             </form>
                                             @endcan
                                         </div>
