@@ -77,6 +77,7 @@
                                             <div class="btn-group" role="group">
                                                 <a href="{{route('student.attendance.show', ['id' => $student->student->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Attendance</a>
                                                 <a href="{{url('students/view/profile/'.$student->student->id)}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Profile</a>
+                                                <a href="{{route('student.grade.show', ['id' => $student->student->id, 'class_id' => request()->query('class_id', 0), 'section_id' => request()->query('section_id', 0)])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-journal-check"></i> View Grade</a>
                                                 @can('edit users')
                                                 <a href="{{route('student.edit.show', ['id' => $student->student->id])}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-pen"></i> Edit</a>
                                                 @endcan
