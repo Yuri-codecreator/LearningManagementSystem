@@ -7,11 +7,11 @@
         <div class="col-xs-11 col-sm-11 col-md-11 col-lg-10 col-xl-10 col-xxl-10">
             <div class="row pt-2">
                 <div class="col-md-5 ps-4">
-                    <h1 class="display-6 mb-3"><i class="bi bi-journal-text"></i> Create Syllabus</h1>
+                    <h1 class="display-6 mb-3"><i class="bi bi-journal-text"></i> Upload Curriculum Guide</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{route('home')}}">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Create Syllabus</li>
+                            <li class="breadcrumb-item active" aria-current="page">Upload Curriculum Guide</li>
                         </ol>
                     </nav>
                     @include('session-messages')
@@ -20,7 +20,7 @@
                             @csrf
                             <input type="hidden" name="session_id" value="{{$current_school_session_id}}">
                             <div class="mb-3">
-                                <p>Add Syllabus to class:</p>
+                                <p>Add Curriculum Guide to class:</p>
                                 <select onchange="getCourses(this);" class="form-select" name="class_id" required>
                                     @isset($school_classes)
                                         <option selected disabled>Please select a class</option>
@@ -36,15 +36,15 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="syllabus-name" class="form-label">Syllabus Name</label>
-                                <input type="text" class="form-control" id="syllabus-name" name="syllabus_name" placeholder="Syllabus Name" required>
+                                <label for="syllabus-name" class="form-label">Curriculum Name</label>
+                                <input type="text" class="form-control" id="syllabus-name" name="syllabus_name" placeholder="Curriculum Name" required>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="syllabus-file" class="form-label">Syllabus File</label>
+                                <label for="syllabus-file" class="form-label">Curriculum File</label>
                                 <input type="file" name="file" class="form-control" id="syllabus-file" accept=".jpg,.jpeg,.bmp,.png,.gif,.doc,.docx,.csv,.rtf,.xlsx,.xls,.txt,.pdf,.zip" required>
                             </div>
                             <div class="mb-4">
-                                <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check2"></i> Create</button>
+                                <button type="submit" class="btn btn-outline-primary"><i class="bi bi-check2"></i> Upload / Update</button>
                             </div>
                         </form>
                     </div>

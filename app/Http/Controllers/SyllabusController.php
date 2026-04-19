@@ -79,7 +79,7 @@ class SyllabusController extends Controller
             $syllabusRepository = new SyllabusRepository();
             $syllabusRepository->store($validatedRequest);
 
-            return back()->with('status', 'Creating syllabus was successful!');
+            return back()->with('status', 'Curriculum guide upload was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
@@ -131,7 +131,7 @@ class SyllabusController extends Controller
             $syllabusRepository = new SyllabusRepository();
             $syllabusRepository->delete($request->syllabus_id);
 
-            return back()->with('status', 'Syllabus deletion was successful!');
+            return back()->with('status', 'Curriculum guide deletion was successful!');
         } catch (\Exception $e) {
             return back()->withError($e->getMessage());
         }
