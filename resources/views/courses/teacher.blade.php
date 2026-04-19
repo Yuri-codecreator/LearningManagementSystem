@@ -47,11 +47,11 @@
                                 </thead>
                                 <tbody>
                                     @isset($courses)
-                                        @foreach ($courses as $course)
+                                        @forelse ($courses as $course)
                                         <tr>
-                                            <td>{{$course->course->course_name}}</td>
-                                            <td>{{$course->schoolClass->class_name}}</td>
-                                            <td>{{$course->section->section_name}}</td>
+                                            <td>{{optional($course->course)->course_name ?? 'N/A'}}</td>
+                                            <td>{{optional($course->schoolClass)->class_name ?? 'N/A'}}</td>
+                                            <td>{{optional($course->section)->section_name ?? 'N/A'}}</td>
                                             <td>
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -105,7 +105,11 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        @endforeach
+                                        @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">No courses found for the selected semester.</td>
+                                        </tr>
+                                        @endforelse
                                     @endisset
                                 </tbody>
                             </table>
