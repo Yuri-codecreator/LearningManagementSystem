@@ -3,8 +3,16 @@
 namespace App\Repositories;
 
 use App\Models\Course;
-use App\Models\Semester;
+use App\Models\Exam;
+use App\Models\Mark;
+use App\Models\Routine;
+use App\Models\Syllabus;
+use App\Models\Attendance;
+use App\Models\Assignment;
+use App\Models\FinalMark;
+use App\Models\AssignedTeacher;
 use App\Interfaces\CourseInterface;
+use Illuminate\Support\Facades\DB;
 
 class CourseRepository implements CourseInterface {
     public function create($request) {
@@ -35,6 +43,24 @@ class CourseRepository implements CourseInterface {
             ]);
         } catch (\Exception $e) {
             throw new \Exception('Failed to update Course. '.$e->getMessage());
+        }
+    }
+
+    public function delete($id) {
+        try {
+            DB::transaction(function () use ($id) {
+                AssignedTeacher::where('course_id', $id)->delete();
+                Assignment::where('course_id', $id)->delete();
+                Attendance::where('course_id', $id)->delete();
+                Mark::where('course_id', $id)->delete();
+                FinalMark::where('course_id', $id)->delete();
+                Exam::where('course_id', $id)->delete();
+                Routine::where('course_id', $id)->delete();
+                Syllabus::where('course_id', $id)->delete();
+                Course::where('id', $id)->delete();
+            });
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to delete Course. '.$e->getMessage());
         }
     }
 }

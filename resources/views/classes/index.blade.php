@@ -14,6 +14,7 @@
                             <li class="breadcrumb-item active" aria-current="page">Classes</li>
                         </ol>
                     </nav>
+                    @include('session-messages')
                     <div class="row">
                         @isset($school_classes)
                             @foreach ($school_classes as $school_class)
@@ -91,6 +92,13 @@
                                                             <td>
                                                                 <div class="btn-group" role="group">
                                                                     <a href="{{asset('storage/'.$syllabus->syllabus_file_path)}}" role="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Download</a>
+                                                                    @can('delete syllabi')
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Are you sure you want to delete this syllabus?')) document.getElementById('class-syllabus-delete-form-{{$syllabus->id}}').submit();"><i class="bi bi-trash2"></i> Delete</button>
+                                                                    <form id="class-syllabus-delete-form-{{$syllabus->id}}" action="{{ route('syllabus.delete') }}" method="POST" class="d-none">
+                                                                        @csrf
+                                                                        <input type="hidden" name="id" value="{{$syllabus->id}}">
+                                                                    </form>
+                                                                    @endcan
                                                                 </div>
                                                             </td>
                                                             </tr>
@@ -117,6 +125,11 @@
                                                                 <td>
                                                                     @can('edit courses')
                                                                     <a href="{{route('course.edit', ['id' => $course->id])}}" class="btn btn-sm btn-outline-primary" role="button"><i class="bi bi-pencil"></i> Edit</a>
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Are you sure you want to delete this course?')) document.getElementById('course-delete-form-{{$course->id}}').submit();"><i class="bi bi-trash2"></i> Delete</button>
+                                                                    <form id="course-delete-form-{{$course->id}}" action="{{ route('course.delete') }}" method="POST" class="d-none">
+                                                                        @csrf
+                                                                        <input type="hidden" name="course_id" value="{{$course->id}}">
+                                                                    </form>
                                                                     @endcan
                                                                 </td>
                                                             </tr>
@@ -132,7 +145,14 @@
                                                 <span>Total Sections: {{$total_sections}}</span>
                                             @endisset
                                             @can('edit classes')
-                                            <span><a href="{{route('class.edit', ['id' => $school_class->id])}}" class="btn btn-sm btn-outline-primary" role="button"><i class="bi bi-pencil"></i> Edit Class</a></span>
+                                            <span class="d-flex gap-2">
+                                                <a href="{{route('class.edit', ['id' => $school_class->id])}}" class="btn btn-sm btn-outline-primary" role="button"><i class="bi bi-pencil"></i> Edit Class</a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Are you sure you want to delete this class?')) document.getElementById('class-delete-form-{{$school_class->id}}').submit();"><i class="bi bi-trash2"></i> Delete Class</button>
+                                                <form id="class-delete-form-{{$school_class->id}}" action="{{ route('class.delete') }}" method="POST" class="d-none">
+                                                    @csrf
+                                                    <input type="hidden" name="class_id" value="{{$school_class->id}}">
+                                                </form>
+                                            </span>
                                             @endcan
                                         </div>
                                     </div>

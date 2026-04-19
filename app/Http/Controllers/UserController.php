@@ -174,6 +174,38 @@ class UserController extends Controller
         }
     }
 
+    public function destroyStudent(Request $request) {
+        abort_unless(auth()->user()->can('edit users'), 403);
+
+        $request->validate([
+            'student_id' => 'required|integer'
+        ]);
+
+        try {
+            $this->userRepository->deleteStudent($request->student_id);
+
+            return back()->with('status', 'Student deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+    }
+
+    public function destroyTeacher(Request $request) {
+        abort_unless(auth()->user()->can('edit users'), 403);
+
+        $request->validate([
+            'teacher_id' => 'required|integer'
+        ]);
+
+        try {
+            $this->userRepository->deleteTeacher($request->teacher_id);
+
+            return back()->with('status', 'Teacher deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
+    }
+
     public function getTeacherList(){
         $teachers = $this->userRepository->getAllTeachers();
 

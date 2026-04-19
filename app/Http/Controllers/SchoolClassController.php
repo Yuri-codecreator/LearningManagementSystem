@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use App\Interfaces\SchoolClassInterface;
 use App\Interfaces\SchoolSessionInterface;
@@ -124,8 +123,20 @@ class SchoolClassController extends Controller
      * @param  \App\Models\SchoolClass  $schoolClass
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SchoolClass $schoolClass)
+    public function destroy(Request $request)
     {
-        //
+        abort_unless(auth()->user()->can('edit classes'), 403);
+
+        $request->validate([
+            'class_id' => 'required|integer'
+        ]);
+
+        try {
+            $this->schoolClassRepository->delete($request->class_id);
+
+            return back()->with('status', 'Class deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }

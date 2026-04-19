@@ -63,6 +63,33 @@
                     });
                 }
             },
+            eventRender: function (event, element) {
+                if({{$selectable}}){
+                    var deleteBtn = $('<button type="button" class="btn btn-sm btn-danger ms-1 py-0 px-1" title="Delete event"><i class="bi bi-trash2"></i></button>');
+                    deleteBtn.on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        var eventDelete = confirm("Are you sure to delete?");
+                        if (eventDelete) {
+                            $.ajax({
+                                type: "POST",
+                                url: SITEURL + '/calendar-crud-ajax',
+                                data: {
+                                    id: event.id,
+                                    type: 'delete'
+                                },
+                                success: function () {
+                                    calendar.fullCalendar('removeEvents', event.id);
+                                    displayMessage("Event removed");
+                                }
+                            });
+                        }
+                    });
+
+                    element.find('.fc-content').append(deleteBtn);
+                }
+            },
             eventResize: function (event, delta) {
                 var event_start = $.fullCalendar.formatDate(event.start, "Y-MM-DD");
                 var event_end = $.fullCalendar.formatDate(event.end, "Y-MM-DD");

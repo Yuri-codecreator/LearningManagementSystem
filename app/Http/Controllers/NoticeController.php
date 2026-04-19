@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notice;
 use Illuminate\Http\Request;
 use App\Traits\SchoolSession;
 use App\Repositories\NoticeRepository;
@@ -98,8 +97,21 @@ class NoticeController extends Controller
      * @param  \App\Models\Notice  $notice
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Notice $notice)
+    public function destroy(Request $request)
     {
-        //
+        abort_unless(auth()->user()->can('delete notices'), 403);
+
+        $request->validate([
+            'notice_id' => 'required|integer'
+        ]);
+
+        try {
+            $noticeRepository = new NoticeRepository();
+            $noticeRepository->delete($request->notice_id);
+
+            return back()->with('status', 'Notice deletion was successful!');
+        } catch (\Exception $e) {
+            return back()->withError($e->getMessage());
+        }
     }
 }
